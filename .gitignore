@@ -5,4 +5,5 @@ keys.txt
 # Secrets em texto plano temporarios
 *.decrypted.yaml
 
-.docs/*
+# Documentacao local
+docs/plans/

@@ -25,6 +25,8 @@ spec:
               value: /.config
             - name: SOPS_AGE_KEY_FILE
               value: /.config/sops/age/keys.txt
+            - name: PATH
+              value: /custom-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           volumeMounts:
             - mountPath: /custom-tools
               name: custom-tools
