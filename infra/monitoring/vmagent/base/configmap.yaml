@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmagent-config
+  namespace: monitoring
+data:
+  scrape.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+
+    scrape_configs:
+      - job_name: 'pve'
+        metrics_path: /pve
+        params:
+          module:
+            - default
+        static_configs:
+          - targets:
+              - '192.168.15.199'
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - target_label: __address__
+            replacement: pve-exporter.monitoring.svc:9221
+
+      - job_name: 'node'
+        static_configs:
+          - targets:
+              - 'node-exporter.monitoring.svc:9100'
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: instance
+            regex: (.+):\d+
+            replacement: '${1}'
+
+      - job_name: 'vmagent-self'
+        static_configs:
+          - targets:
+              - 'vmagent.monitoring.svc:8429'
+
+      - job_name: 'pihole'
+        scrape_interval: 1h
+        scrape_timeout: 2m
+        static_configs:
+          - targets:
+              - 'pihole-exporter.monitoring.svc.cluster.local:9617'
+
+      - job_name: 'speedtest'
+        scrape_interval: 3h
+        scrape_timeout: 5m
+        static_configs:
+          - targets:
+              - '192.168.15.92:9798'

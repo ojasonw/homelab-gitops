@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-exporter
+  namespace: monitoring
+  labels:
+    app: pihole-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole-exporter
+  template:
+    metadata:
+      labels:
+        app: pihole-exporter
+    spec:
+      containers:
+        - name: pihole-exporter
+          image: ekofr/pihole-exporter:latest
+          ports:
+            - name: http-metrics
+              containerPort: 9617
+          envFrom:
+            - secretRef:
+                name: pihole-exporter-env
+          volumeMounts:
+            - name: ca-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: http-metrics
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: http-metrics
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 10
+      volumes:
+        - name: ca-certs
+          hostPath:
+            path: /etc/ssl/certs
+            type: Directory

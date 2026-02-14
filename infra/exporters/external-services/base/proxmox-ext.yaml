@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxmox-ext
+  namespace: monitoring
+spec:
+  ports:
+    - name: https
+      port: 8006
+      targetPort: 8006
+  type: ClusterIP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: proxmox-ext-manual
+  namespace: monitoring
+  labels:
+    kubernetes.io/service-name: proxmox-ext
+addressType: IPv4
+ports:
+  - name: https
+    protocol: TCP
+    port: 8006
+endpoints:
+  - addresses:
+      - "192.168.15.199"

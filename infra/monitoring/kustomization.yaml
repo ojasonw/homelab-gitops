@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace/base
+  - victoriametrics/base
+  - vmagent/base
+  - vmalert/base
+  - alertmanager/base
+  - grafana/base

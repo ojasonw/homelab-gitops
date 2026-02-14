@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmalert-rules
+  namespace: monitoring
+data:
+  rules.yaml: |
+    groups:
+      - name: speedtest.rules
+        interval: 1m
+        rules:
+          - alert: SpeedtestDown
+            expr: speedtest_up == 0
+            for: 5m
+            labels:
+              severity: critical
+              team: netops
+            annotations:
+              summary: "Speedtest sem dados"
+              description: "O exporter respondeu, mas o teste falhou (speedtest_up=0) por 5m."
+
+          - alert: SpeedtestDownloadSlow
+            expr: (speedtest_download_bits_per_second / 1e6) < 300
+            for: 10m
+            labels:
+              severity: warning
+              topic: speedtest
+            annotations:
+              summary: Download lento
+              description: "Download < 300 Mb/s por 10m (valor={{ $value | printf \"%.2f\" }} Mb/s)."
+
+          - alert: SpeedtestUploadSlow
+            expr: (speedtest_upload_bits_per_second / 1e6) < 150
+            for: 10m
+            labels:
+              severity: warning
+              topic: speedtest
+            annotations:
+              summary: Upload lento
+              description: "Upload < 150 Mb/s por 10m (valor={{ $value | printf \"%.2f\" }} Mb/s)."
+
+          - alert: SpeedtestHighPing
+            expr: speedtest_ping_latency_milliseconds > 30
+            for: 10m
+            labels:
+              severity: warning
+              topic: speedtest
+            annotations:
+              summary: "Latencia alta"
+              description: "Ping > 30 ms por 10m (valor={{ $value | printf \"%.2f\" }} ms)."
+
+          - alert: SpeedtestHighJitter
+            expr: speedtest_jitter_latency_milliseconds > 10
+            for: 10m
+            labels:
+              severity: warning
+              topic: speedtest
+            annotations:
+              summary: Jitter alto
+              description: "Jitter > 10 ms por 10m (valor={{ $value | printf \"%.2f\" }} ms)."
+
+          - alert: SpeedtestDownloadMedian
+            expr: quantile_over_time(0.5, speedtest_download_bits_per_second[30m]) / 1e6
+            for: 0s
+            keep_firing_for: 30m
+            labels:
+              severity: info
+              topic: speedtest
+              metric: download
+            annotations:
+              summary: "Speedtest: Download (mediana 30 min)"
+              description: "Download mediana = {{ $value | printf \"%.2f\" }} Mb/s"
+
+          - alert: SpeedtestUploadMedian
+            expr: quantile_over_time(0.5, speedtest_upload_bits_per_second[30m]) / 1e6
+            for: 0s
+            keep_firing_for: 30m
+            labels:
+              severity: info
+              topic: speedtest
+              metric: upload
+            annotations:
+              summary: "Speedtest: Upload (mediana 30 min)"
+              description: "Upload mediana = {{ $value | printf \"%.2f\" }} Mb/s"
+
+          - alert: SpeedtestPingMedian
+            expr: quantile_over_time(0.5, speedtest_ping_latency_milliseconds[30m])
+            for: 0s
+            keep_firing_for: 30m
+            labels:
+              severity: info
+              topic: speedtest
+              metric: ping
+            annotations:
+              summary: "Speedtest: Ping (mediana 30 min)"
+              description: "Ping mediana = {{ $value | printf \"%.2f\" }} ms"
+
+          - alert: SpeedtestJitterMedian
+            expr: quantile_over_time(0.5, speedtest_jitter_latency_milliseconds[30m])
+            for: 0s
+            keep_firing_for: 30m
+            labels:
+              severity: info
+              topic: speedtest
+              metric: jitter
+            annotations:
+              summary: "Speedtest: Jitter (mediana 30 min)"
+              description: "Jitter mediana = {{ $value | printf \"%.2f\" }} ms"
+
+          - alert: Validator
+            expr: vector(1)
+            for: 0s
+            labels:
+              severity: info
+              topic: test
+            annotations:
+              summary: "Fluxo seguindo conforme esperado."
+              description: "Validacao do encadeamento vmalert -> Alertmanager -> Telegram."

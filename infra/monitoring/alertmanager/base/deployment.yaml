@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring
+  labels:
+    app: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: fix-perms-am
+          image: busybox:1.36
+          command: ["sh", "-c", "mkdir -p /alertmanager && chown -R 65534:65534 /alertmanager || true"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /alertmanager
+      containers:
+        - name: alertmanager
+          image: quay.io/prometheus/alertmanager:v0.28.1
+          args:
+            - --config.file=/etc/alertmanager/alertmanager.yml
+            - --storage.path=/alertmanager
+          ports:
+            - name: http
+              containerPort: 9093
+          volumeMounts:
+            - name: am-config
+              mountPath: /etc/alertmanager/alertmanager.yml
+              subPath: alertmanager.yml
+              readOnly: true
+            - name: am-templates
+              mountPath: /etc/alertmanager/templates
+              readOnly: true
+            - name: data
+              mountPath: /alertmanager
+      volumes:
+        - name: am-config
+          configMap:
+            name: alertmanager-config
+        - name: am-templates
+          configMap:
+            name: alertmanager-templates
+        - name: data
+          persistentVolumeClaim:
+            claimName: alertmanager-pvc

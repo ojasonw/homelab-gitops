@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoriametrics
+  namespace: monitoring
+  labels:
+    app: victoriametrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: victoriametrics
+  template:
+    metadata:
+      labels:
+        app: victoriametrics
+    spec:
+      securityContext:
+        fsGroup: 0
+        fsGroupChangePolicy: "OnRootMismatch"
+      initContainers:
+        - name: fix-perms-vm
+          image: busybox:1.36
+          command: ["sh", "-c", "mkdir -p /victoria-metrics-data && chown -R 0:0 /victoria-metrics-data || true"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /victoria-metrics-data
+      containers:
+        - name: victoriametrics
+          image: victoriametrics/victoria-metrics:latest
+          args:
+            - --selfScrapeInterval=10s
+            - --httpListenAddr=:8428
+          ports:
+            - name: http
+              containerPort: 8428
+          volumeMounts:
+            - name: data
+              mountPath: /victoria-metrics-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: victoria-data

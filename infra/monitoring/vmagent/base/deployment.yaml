@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmagent
+  namespace: monitoring
+  labels:
+    app: vmagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vmagent
+  template:
+    metadata:
+      labels:
+        app: vmagent
+    spec:
+      containers:
+        - name: vmagent
+          image: victoriametrics/vmagent:v1.119.0
+          args:
+            - -remoteWrite.url=http://victoriametrics.monitoring.svc:8428/api/v1/write
+            - -promscrape.config=/etc/vmagent-config/scrape.yml
+            - -httpListenAddr=:8429
+          ports:
+            - name: http
+              containerPort: 8429
+          volumeMounts:
+            - name: cfg
+              mountPath: /etc/vmagent-config
+              readOnly: true
+      volumes:
+        - name: cfg
+          configMap:
+            name: vmagent-config
+            items:
+              - key: scrape.yml
+                path: scrape.yml

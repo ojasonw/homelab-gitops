@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  selector:
+    app: vmagent
+  ports:
+    - name: http
+      port: 8429
+      targetPort: http
+  type: ClusterIP

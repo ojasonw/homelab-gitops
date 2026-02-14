@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vmalert
+  template:
+    metadata:
+      labels:
+        app: vmalert
+    spec:
+      containers:
+        - name: vmalert
+          image: victoriametrics/vmalert:v1.103.0
+          args:
+            - -rule=/etc/vmalert/rules/*.yaml
+            - -datasource.url=http://victoriametrics.monitoring.svc:8428
+            - -notifier.url=http://alertmanager.monitoring.svc:9093
+          volumeMounts:
+            - name: rules
+              mountPath: /etc/vmalert/rules
+      volumes:
+        - name: rules
+          configMap:
+            name: vmalert-rules

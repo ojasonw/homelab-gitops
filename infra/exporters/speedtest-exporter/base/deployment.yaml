@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speedtest-exporter
+  namespace: monitoring
+  labels:
+    app: speedtest-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedtest-exporter
+  template:
+    metadata:
+      labels:
+        app: speedtest-exporter
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: speedtest-exporter
+          image: ghcr.io/miguelndecarvalho/speedtest-exporter:v3.1
+          ports:
+            - name: http
+              containerPort: 9798
+          env:
+            - name: SPEEDTEST_PORT
+              value: "9798"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
