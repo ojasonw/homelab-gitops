@@ -1,6 +1,8 @@
-# Chaves privadas age - NUNCA commitar
+# Chaves privadas age 
 *.agekey
 keys.txt
 
 # Secrets em texto plano temporarios
 *.decrypted.yaml
+
+.docs/*
