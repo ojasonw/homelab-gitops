@@ -1,13 +1,13 @@
 # Homelab GitOps
 
 ## Visão Geral
-Este repositório gerencia a infraestrutura e as aplicações para um cluster Kubernetes de homelab usando princípios de GitOps. Ele utiliza ArgoCD para implantação contínua, Kustomize para personalização de manifestos Kubernetes e SOPS para gerenciamento seguro de segredos diretamente no repositório Git.
+Este repositório gerencia a infraestrutura e as aplicações para um cluster Kubernetes de homelab usando princípios de GitOps. Ele utiliza ArgoCD para implantação contínua, Kustomize para personalização de manifestos Kubernetes e External Secrets Operator com Infisical para gerenciamento seguro de segredos.
 
 ## Tecnologias Utilizadas
 -   **Kubernetes:** Plataforma de orquestração de containers.
 -   **ArgoCD:** Entrega contínua declarativa de GitOps para Kubernetes.
 -   **Kustomize:** Personalização de configurações Kubernetes.
--   **SOPS (Secrets OPerationS):** Criptografa segredos armazenados no Git.
+-   **External Secrets Operator + Infisical:** Sincroniza segredos armazenados no Infisical diretamente para o cluster Kubernetes.
 -   **Pilha de Monitoramento:**
     -   **Compatível com Prometheus:** Para monitoramento de séries temporais.
     -   **Grafana:** Para visualização de dados e dashboards.
@@ -31,8 +31,7 @@ Este repositório gerencia a infraestrutura e as aplicações para um cluster Ku
     -   Cada subdiretório (por exemplo, `cloudflare-tunnel`, `exporters`, `monitoring`, `n8n`) representa uma aplicação ou pilha distinta, contendo suas definições Kustomize `base/`.
     -   `exporters/`: Contém as bases Kustomize para todos os exporters Prometheus configurados.
     -   `monitoring/`: Contém as bases Kustomize para os componentes da pilha de monitoramento principal (VictoriaMetrics, Grafana, Alertmanager, etc.).
-
--   `.sops.yaml`: Arquivo de configuração para Mozilla SOPS, definindo a chave de criptografia e as regras para gerenciar segredos criptografados dentro do repositório.
+    -   `external-secrets/`: Contém o ClusterSecretStore do Infisical e recursos relacionados.
 
 -   `docs/`: Contém documentação suplementar, planos arquitetônicos e outras informações relevantes.
 
@@ -43,13 +42,14 @@ Para que esta infraestrutura de homelab seja implantada, você geralmente seguir
 1.  **Pré-requisitos:**
     *   Um cluster Kubernetes funcional.
     *   ArgoCD instalado e configurado em seu cluster.
-    *   SOPS instalado localmente e configurado com acesso às chaves de descriptografia (por exemplo, chave GPG ou acesso KMS) que correspondem à configuração `.sops.yaml`.
+    *   External Secrets Operator instalado no cluster (gerido via ArgoCD).
+    *   Conta no Infisical com os segredos configurados.
 
 2.  **Configuração Inicial do ArgoCD:**
     *   Aplique o manifesto `argocd/root-app.yaml` à sua instância ArgoCD. Esta aplicação atua como a "raiz de confiança" e descobrirá e sincronizará automaticamente todas as aplicações filhas definidas em `argocd/infra/`.
 
 3.  **Gerenciamento de Segredos:**
-    *   Todos os dados sensíveis são criptografados usando SOPS. Você precisará garantir que seu ambiente local e o ArgoCD (se precisar descriptografar segredos) tenham a configuração SOPS e as chaves necessárias para descriptografar arquivos como `infra/*/base/secret.yaml`.
+    *   Os segredos são geridos no Infisical e sincronizados para o cluster via External Secrets Operator. Cada aplicação tem um `ExternalSecret` que referencia as chaves no Infisical através do `ClusterSecretStore`.
 
 4.  **Personalização:**
     *   Modifique os diretórios Kustomize `base/` dentro de `infra/` para ajustar configurações, limites de recursos e outras definições para corresponder ao seu ambiente de homelab específico e preferências.
@@ -63,9 +63,9 @@ Este repositório gerencia uma variedade de serviços essenciais de homelab:
 -   **n8n:** Fornece uma plataforma de automação de fluxo de trabalho auto-hospedada, poderosa e extensível para conectar vários serviços e automatizar tarefas.
 -   **Prometheus Exporters:** Coletam e expõem continuamente métricas de diferentes componentes do seu homelab para consumo pela pilha de monitoramento.
 
-## Gerenciamento de Segredos com SOPS
+## Gerenciamento de Segredos com External Secrets
 
-Mozilla SOPS é parte integrante deste repositório para gerenciar informações sensíveis com segurança.
--   Segredos (por exemplo, chaves de API, senhas, configurações sensíveis) são criptografados e armazenados diretamente no repositório Git como arquivos `secret.yaml` dentro do diretório `base/` de cada aplicação.
--   Isso permite o controle de versão transparente de segredos, mantendo-os criptografados em repouso.
--   Certifique-se de que seu ambiente SOPS esteja configurado corretamente para descriptografar esses arquivos durante a implantação. Consulte o arquivo `.sops.yaml` para configurações de chave específicas.
+O External Secrets Operator sincroniza segredos do Infisical para o cluster Kubernetes.
+-   Cada aplicação que necessita de segredos tem um ficheiro `*-externalsecret.yaml` no seu diretório `base/`.
+-   Os segredos são organizados por pasta no Infisical (ex: `/cloudflare/`, `/n8n/`, `/pve-exporter/`, `/pihole-exporter/`).
+-   O `ClusterSecretStore` está definido em `infra/external-secrets/base/` e aponta para o projeto Infisical.

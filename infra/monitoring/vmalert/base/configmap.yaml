@@ -116,3 +116,99 @@ data:
             annotations:
               summary: "Fluxo seguindo conforme esperado."
               description: "Validacao do encadeamento vmalert -> Alertmanager -> Telegram."
+
+      - name: proxmox.rules
+        interval: 30s
+        rules:
+          - alert: ProxmoxNodeMemoryHigh
+            expr: (pve_memory_usage_bytes / pve_memory_size_bytes) * 100 > 90
+            for: 5m
+            labels:
+              severity: critical
+              topic: proxmox
+            annotations:
+              summary: "Proxmox RAM acima de 90%"
+              description: "Node {{ $labels.id }} usando {{ $value | printf \"%.1f\" }}% de RAM por 5m. Risco de OOM e swap excessivo."
+
+          - alert: NodeSwapHigh
+            expr: ((node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes) * 100 > 50
+            for: 10m
+            labels:
+              severity: warning
+              topic: node
+            annotations:
+              summary: "Swap acima de 50%"
+              description: "{{ $labels.instance }} usando {{ $value | printf \"%.1f\" }}% do swap por 10m. Em HDD, swap causa IO stall."
+
+          - alert: ProxmoxNodeDiskHigh
+            expr: (pve_disk_usage_bytes / pve_disk_size_bytes) * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+              topic: proxmox
+            annotations:
+              summary: "Disco do Proxmox acima de 85%"
+              description: "Node {{ $labels.id }} com {{ $value | printf \"%.1f\" }}% de disco usado."
+
+          - alert: ProxmoxNodeCpuHigh
+            expr: pve_cpu_usage_ratio * 100 > 90
+            for: 10m
+            labels:
+              severity: warning
+              topic: proxmox
+            annotations:
+              summary: "CPU do Proxmox acima de 90%"
+              description: "Node {{ $labels.id }} com {{ $value | printf \"%.1f\" }}% de CPU por 10m."
+
+          - alert: ProxmoxVMDown
+            expr: pve_up{id=~"qemu/100|qemu/101"} == 0
+            for: 2m
+            labels:
+              severity: critical
+              topic: proxmox
+            annotations:
+              summary: "VM critica parada"
+              description: "VM {{ $labels.id }} ({{ $labels.name }}) esta down ha 2m."
+
+          - alert: ProxmoxGuestMemoryHigh
+            expr: (pve_memory_usage_bytes{id=~"qemu/.*"} / pve_memory_size_bytes{id=~"qemu/.*"}) * 100 > 90
+            for: 5m
+            labels:
+              severity: warning
+              topic: proxmox
+            annotations:
+              summary: "VM com RAM acima de 90%"
+              description: "VM {{ $labels.name }} ({{ $labels.id }}) usando {{ $value | printf \"%.1f\" }}% de RAM."
+
+      - name: node.rules
+        interval: 30s
+        rules:
+          - alert: NodeHighIOWait
+            expr: avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 20
+            for: 5m
+            labels:
+              severity: critical
+              topic: node
+            annotations:
+              summary: "IO Wait alto no node"
+              description: "IO Wait em {{ $value | printf \"%.1f\" }}% por 5m. Disco saturado, risco de travamento."
+
+          - alert: NodeFilesystemFull
+            expr: (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}) * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+              topic: node
+            annotations:
+              summary: "Filesystem acima de 85%"
+              description: "{{ $labels.mountpoint }} em {{ $labels.instance }} com {{ $value | printf \"%.1f\" }}% de uso."
+
+          - alert: NodeMemoryPressure
+            expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
+            for: 5m
+            labels:
+              severity: critical
+              topic: node
+            annotations:
+              summary: "Memoria do node acima de 90%"
+              description: "Node {{ $labels.instance }} com {{ $value | printf \"%.1f\" }}% de RAM usada."
