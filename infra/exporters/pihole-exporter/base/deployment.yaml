@@ -21,9 +21,20 @@ spec:
           ports:
             - name: http-metrics
               containerPort: 9617
-          envFrom:
-            - secretRef:
-                name: pihole-exporter-env
+          env:
+            - name: PIHOLE_HOSTNAME
+              value: "192.168.15.100"
+            - name: PIHOLE_PROTOCOL
+              value: "http"
+            - name: PIHOLE_PORT
+              value: "8080"
+            - name: PORT
+              value: "9617"
+            - name: PIHOLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-exporter-secret
+                  key: PIHOLE_PASSWORD
           volumeMounts:
             - name: ca-certs
               mountPath: /etc/ssl/certs

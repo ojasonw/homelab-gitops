@@ -46,6 +46,9 @@ spec:
             - name: am-templates
               mountPath: /etc/alertmanager/templates
               readOnly: true
+            - name: am-secrets
+              mountPath: /etc/alertmanager/secrets
+              readOnly: true
             - name: data
               mountPath: /alertmanager
       volumes:
@@ -55,6 +58,9 @@ spec:
         - name: am-templates
           configMap:
             name: alertmanager-templates
+        - name: am-secrets
+          secret:
+            secretName: alertmanager-secrets
         - name: data
           persistentVolumeClaim:
             claimName: alertmanager-pvc

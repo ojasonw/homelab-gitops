@@ -7,5 +7,4 @@ resources:
   - postgres-service.yaml
   - deployment.yaml
   - service.yaml
-generators:
-  - secret-generator.yaml
+  - n8n-externalsecret.yaml
