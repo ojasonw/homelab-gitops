@@ -21,14 +21,15 @@ spec:
           ports:
             - name: http
               containerPort: 9221
-          volumeMounts:
-            - name: pvecfg
-              mountPath: /etc/prometheus
-              readOnly: true
-      volumes:
-        - name: pvecfg
-          secret:
-            secretName: pve-config
-            items:
-              - key: pve.yml
-                path: pve.yml
+          env:
+            - name: PVE_USER
+              value: "monitoring@pve"
+            - name: PVE_TOKEN_NAME
+              value: "monitoring-token"
+            - name: PVE_VERIFY_SSL
+              value: "false"
+            - name: PVE_TOKEN_VALUE
+              valueFrom:
+                secretKeyRef:
+                  name: pve-exporter-secret
+                  key: PVE_TOKEN_VALUE
