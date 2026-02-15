@@ -4,10 +4,9 @@ metadata:
   name: alertmanager-pvc
   namespace: monitoring
 spec:
-  storageClassName: manual
+  storageClassName: custom-local-path
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  volumeName: pv-alertmanager

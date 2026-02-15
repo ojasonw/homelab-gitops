@@ -4,7 +4,7 @@ metadata:
   name: n8n-data
   namespace: n8n
 spec:
-  storageClassName: local-path
+  storageClassName: custom-local-path
   accessModes:
     - ReadWriteOnce
   resources:
@@ -17,7 +17,7 @@ metadata:
   name: n8n-postgres-data
   namespace: n8n
 spec:
-  storageClassName: local-path
+  storageClassName: custom-local-path
   accessModes:
     - ReadWriteOnce
   resources:

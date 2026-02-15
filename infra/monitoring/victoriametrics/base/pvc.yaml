@@ -4,10 +4,9 @@ metadata:
   name: victoria-data
   namespace: monitoring
 spec:
-  storageClassName: manual
+  storageClassName: custom-local-path
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 8Gi
-  volumeName: pv-victoria
