@@ -26,8 +26,8 @@ spec:
         - name: TUNNEL_TOKEN
           valueFrom:
             secretKeyRef:
-              name: cloudflare-tunnel-token
-              key: token
+              name: cloudflare-tunnel
+              key: CLOUDFLARE_TUNNEL_TOKEN
         resources:
           requests:
             cpu: 50m
