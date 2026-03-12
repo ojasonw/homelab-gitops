@@ -967,7 +967,7 @@ data:
                                 </div>
                                 <div class="contact-item-text">
                                     <span>E-mail</span>
-                                    <p>contato@jwltech.com.br</p>
+                                    <p>jwl.tech@outlook.com.br</p>
                                 </div>
                             </div>
                             <div class="contact-item">
@@ -976,7 +976,7 @@ data:
                                 </div>
                                 <div class="contact-item-text">
                                     <span>Telefone</span>
-                                    <p>(11) 9xxxx-xxxx</p>
+                                    <p>(11) 96911-0562</p>
                                 </div>
                             </div>
                             <div class="contact-item">
@@ -1081,24 +1081,44 @@ data:
 
             revealElements.forEach(el => revealObserver.observe(el));
 
-            // Form submit placeholder
-            document.getElementById('submitBtn').addEventListener('click', () => {
-                const name = document.getElementById('name').value;
-                const email = document.getElementById('email').value;
-                const message = document.getElementById('message').value;
+            // Form submit
+            document.getElementById('submitBtn').addEventListener('click', async () => {
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const subject = document.getElementById('subject').value.trim();
+                const message = document.getElementById('message').value.trim();
+                const btn = document.getElementById('submitBtn');
 
                 if (!name || !email || !message) {
                     alert('Por favor, preencha os campos obrigatórios.');
                     return;
                 }
 
-                // Aqui você integra com seu backend, EmailJS, Formspree, etc.
-                alert('Mensagem enviada! Entraremos em contato em breve.');
+                btn.disabled = true;
+                btn.textContent = 'Enviando...';
 
-                document.getElementById('name').value = '';
-                document.getElementById('email').value = '';
-                document.getElementById('subject').value = '';
-                document.getElementById('message').value = '';
+                try {
+                    const res = await fetch('https://n8n.artjason.com/webhook/contact-form', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, subject, message })
+                    });
+
+                    if (res.ok) {
+                        alert('Mensagem enviada! Entraremos em contato em breve.');
+                        document.getElementById('name').value = '';
+                        document.getElementById('email').value = '';
+                        document.getElementById('subject').value = '';
+                        document.getElementById('message').value = '';
+                    } else {
+                        alert('Erro ao enviar. Tente novamente.');
+                    }
+                } catch (e) {
+                    alert('Erro ao enviar. Verifique sua conexão.');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar mensagem <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+                }
             });
 
             // Smooth scroll for anchor links
