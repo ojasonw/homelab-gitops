@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: ojasonw/web-site:latest
+          image: ojasonw/web-site:v1.0.1
           ports:
             - containerPort: 80
           resources:
