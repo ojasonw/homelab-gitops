@@ -4,3 +4,6 @@ resources:
   - 00-namespace.yaml
   - 02-deployment.yaml
   - 03-service.yaml
+images:
+  - name: ojasonw/web-site
+    newTag: latest
