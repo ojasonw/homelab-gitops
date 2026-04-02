@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: postgresql-dev
-  namespace: joga-together
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -13,11 +13,11 @@ spec:
 
   sources:
     - repoURL: 'https://github.com/ojasonw/homelab-gitops.git'
-      targetRevision: HEAD
+      targetRevision: main
       ref: valuesRepo
 
     - repoURL: 'https://github.com/ojasonw/homelab-gitops.git'
-      targetRevision: HEAD
+      targetRevision: main
       path: infra/postgresql/chart
       helm:
         releaseName: postgresql-dev
