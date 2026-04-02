@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgresql-dev
+  namespace: joga-together
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: joga-together
+
+  sources:
+    - repoURL: 'https://github.com/ojasonw/homelab-gitops.git'
+      targetRevision: HEAD
+      ref: valuesRepo
+
+    - repoURL: 'https://github.com/ojasonw/homelab-gitops.git'
+      targetRevision: HEAD
+      path: infra/postgresql/chart
+      helm:
+        releaseName: postgresql-dev
+        valueFiles:
+          - $valuesRepo/infra/postgresql/dev/values.yaml
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
