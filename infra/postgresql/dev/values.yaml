@@ -5,5 +5,5 @@ auth:
 
 persistence:
   enabled: true
-  storageClass: data-path
+  storageClass: custom-local-path
   size: 8Gi
