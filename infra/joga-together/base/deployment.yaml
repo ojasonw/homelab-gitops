@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joga-together
+spec:
+  selector:
+    matchLabels:
+      app: joga-together
+  template:
+    metadata:
+      labels:
+        app: joga-together
+    spec:
+      containers:
+      - name: joga-together
+        image: ojasonw/my-java-app:v1.0.6
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: joga-together-secrets
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
