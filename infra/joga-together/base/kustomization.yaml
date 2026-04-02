@@ -4,5 +4,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - nginx-config.yaml
-  - hpa.yaml
   - externalsecret.yaml
