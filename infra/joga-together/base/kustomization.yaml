@@ -7,6 +7,6 @@ resources:
   - externalsecret.yaml
 images:
   - name: ojasonw/joga-together-web
-    newTag: v1.0.0
+    newTag: v1.0.1
   - name: ojasonw/my-java-app
     newTag: v1.0.6
