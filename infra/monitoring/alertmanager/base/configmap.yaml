@@ -30,14 +30,12 @@ data:
             - topic="speedtest"
           group_wait: 30s
           group_interval: 2m
-          repeat_interval: 30m
 
         - receiver: telegram-main
           matchers:
             - severity=~"critical|warning"
           group_wait: 1m
           group_interval: 5m
-          repeat_interval: 12h
 
     receivers:
       - name: default
