@@ -5,20 +5,49 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: joga-together
+      app: joga-together-backend
   template:
     metadata:
       labels:
-        app: joga-together
+        app: joga-together-backend
     spec:
       containers:
-      - name: joga-together
+      - name: joga-together-backend
         image: ojasonw/my-java-app:v1.0.6
         ports:
         - containerPort: 8080
         envFrom:
         - secretRef:
             name: joga-together-secrets
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joga-together-frontend
+spec:
+  selector:
+    matchLabels:
+      app: joga-together-frontend
+  template:
+    metadata:
+      labels:
+        app: joga-together-frontend
+    spec:
+      containers:
+      - name: joga-together-frontend
+        image: ojasonw/joga-together-web:v1.0.0
+        ports:
+        - containerPort: 8081
+        # envFrom:
+        # - secretRef:
+        #     name: joga-together-secrets
         resources:
           requests:
             cpu: 250m
