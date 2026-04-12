@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: joga-together-frontend
-        image: ojasonw/joga-together-web:v1.0.0
+        image: ojasonw/joga-together-web:v1.0.1
         ports:
         - containerPort: 8081
         # envFrom:

@@ -4,7 +4,7 @@ metadata:
   name: joga-together
 spec:
   selector:
-    app: my-service
+    app: joga-together-backend
   ports:
     - protocol: TCP
       port: 8080
