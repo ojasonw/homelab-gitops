@@ -40,7 +40,7 @@ data:
               - 'vmagent.monitoring.svc:8429'
 
       - job_name: 'pihole'
-        scrape_interval: 1h
+        scrape_interval: 60s
         scrape_timeout: 2m
         static_configs:
           - targets:
