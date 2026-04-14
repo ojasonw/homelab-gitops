@@ -1,0 +1,8 @@
+auth:
+  postgresPassword: "devpassword123"
+  database: joga-db-dev
+
+persistence:
+  enabled: true
+  storageClass: custom-local-path
+  size: 2Gi

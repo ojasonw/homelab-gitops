@@ -18,3 +18,9 @@ replicas:
     count: 1
   - name: joga-together-frontend
     count: 1
+
+patches:
+  - path: externalsecret-patch.yaml
+    target:
+      kind: ExternalSecret
+      name: joga-together-secrets
