@@ -23,7 +23,7 @@ spec:
               containerPort: 9617
           env:
             - name: PIHOLE_HOSTNAME
-              value: "192.168.15.100"
+              value: "pihole-web.monitoring.svc.cluster.local"
             - name: PIHOLE_PROTOCOL
               value: "http"
             - name: PIHOLE_PORT
