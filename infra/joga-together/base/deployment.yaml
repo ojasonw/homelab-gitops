@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: joga-together-backend
-        image: ojasonw/my-java-app:v1.0.6
+        image: ojasonw/joga-together-backend:v1.0.6
         ports:
         - containerPort: 8080
         envFrom:
