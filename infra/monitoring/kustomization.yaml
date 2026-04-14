@@ -7,3 +7,4 @@ resources:
   - vmalert/base
   - alertmanager/base
   - grafana/base
+  - pihole/base
