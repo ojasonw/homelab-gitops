@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: postgresql-joga
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - env: prod
+            namespace: joga-together
+            valuesPath: infra/postgresql/joga-prod/values.yaml
+          - env: dev
+            namespace: joga-together-dev
+            valuesPath: infra/postgresql/joga-dev/values.yaml
+  template:
+    metadata:
+      name: 'postgresql-joga-{{.env}}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+        - repoURL: https://github.com/ojasonw/homelab-gitops.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/ojasonw/homelab-gitops.git
+          targetRevision: main
+          path: infra/postgresql/chart
+          helm:
+            releaseName: 'postgresql-joga-{{.env}}'
+            valueFiles:
+              - '$valuesRepo/{{.valuesPath}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

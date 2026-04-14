@@ -1,4 +1,3 @@
-# Environment-specific values for PostgreSQL dev.
 auth:
   postgresPassword: "hlUU2yiAqEFBujBS95FW"
   database: joga-db
