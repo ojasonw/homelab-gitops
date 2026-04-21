@@ -21,8 +21,8 @@ spec:
             name: joga-together-secrets
         resources:
           requests:
-            cpu: 250m
-            memory: 256Mi
+            cpu: 100m
+            memory: 384Mi
           limits:
             cpu: 500m
             memory: 512Mi
@@ -50,8 +50,8 @@ spec:
         #     name: joga-together-secrets
         resources:
           requests:
-            cpu: 250m
-            memory: 256Mi
+            cpu: 10m
+            memory: 32Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 100m
+            memory: 64Mi
