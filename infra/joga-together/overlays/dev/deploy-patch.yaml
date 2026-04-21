@@ -6,4 +6,4 @@ spec:
   template:
     metadata:
       annotations:
-        deploy-time: "2026-04-21T05:56:07Z-4dd843f"
+        deploy-time: "2026-04-21T05:56:39Z-d0697d2"
