@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joga-together-frontend
+spec:
+  template:
+    metadata:
+      annotations:
+        deploy-time: "placeholder"
