@@ -28,3 +28,7 @@ patches:
     target:
       kind: Deployment
       name: joga-together-frontend
+  - path: backend-imagepull-patch.yaml
+    target:
+      kind: Deployment
+      name: joga-together-backend
