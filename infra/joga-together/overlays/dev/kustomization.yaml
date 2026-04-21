@@ -24,3 +24,7 @@ patches:
     target:
       kind: ExternalSecret
       name: joga-together-secrets
+  - path: frontend-imagepull-patch.yaml
+    target:
+      kind: Deployment
+      name: joga-together-frontend

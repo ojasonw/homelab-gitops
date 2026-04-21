@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joga-together-frontend
+spec:
+  template:
+    spec:
+      containers:
+      - name: joga-together-frontend
+        imagePullPolicy: Always
