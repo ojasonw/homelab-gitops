@@ -5,12 +5,11 @@ firefly-db:
     accessModes: ReadWriteOnce
     dataSize: 10Gi
   configs:
+    BACKUP_ENABLED: false
     DBNAME: firefly
     DBUSER: firefly
     TZ: America/Sao_Paulo
     existingSecret: firefly-iii-secrets
-  backup:
-    enabled: false
 
 firefly-iii:
   enabled: true
