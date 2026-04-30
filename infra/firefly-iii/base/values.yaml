@@ -9,6 +9,8 @@ firefly-db:
     DBUSER: firefly
     TZ: America/Sao_Paulo
     existingSecret: firefly-iii-secrets
+  backup:
+    enabled: false
 
 firefly-iii:
   enabled: true
