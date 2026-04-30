@@ -1,0 +1,45 @@
+firefly-db:
+  enabled: true
+  storage:
+    class: custom-local-path
+    accessModes: ReadWriteOnce
+    dataSize: 10Gi
+  configs:
+    DBNAME: firefly
+    DBUSER: firefly
+    TZ: America/Sao_Paulo
+    existingSecret: firefly-iii-secrets
+
+firefly-iii:
+  enabled: true
+  config:
+    existingSecret: firefly-iii-secrets
+    env:
+      DB_CONNECTION: pgsql
+      DB_PORT: "5432"
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly
+      DEFAULT_LANGUAGE: "en_US"
+      DEFAULT_LOCALE: "equal"
+      TZ: "America/Sao_Paulo"
+      TRUSTED_PROXIES: "**"
+  service:
+    type: LoadBalancer
+    port: 80
+  persistence:
+    enabled: true
+    storageClassName: custom-local-path
+    accessModes: ReadWriteOnce
+    storage: 5Gi
+  ingress:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+importer:
+  enabled: false
