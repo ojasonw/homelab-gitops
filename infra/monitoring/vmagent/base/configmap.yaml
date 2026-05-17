@@ -52,3 +52,8 @@ data:
         static_configs:
           - targets:
               - '192.168.15.92:9798'
+
+      - job_name: 'kube-state-metrics'
+        static_configs:
+          - targets:
+              - 'kube-state-metrics.monitoring.svc:8080'

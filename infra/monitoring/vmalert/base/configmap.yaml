@@ -212,3 +212,52 @@ data:
             annotations:
               summary: "Memoria do node acima de 90%"
               description: "Node {{ $labels.instance }} com {{ $value | printf \"%.1f\" }}% de RAM usada."
+
+      - name: kubernetes.rules
+        interval: 30s
+        rules:
+          - alert: PodStuckInError
+            expr: kube_pod_container_status_waiting_reason{reason=~CreateContainerConfigError
+
+      - name: kubernetes.rules
+        interval: 30s
+        rules:
+          - alert: PodStuckInError
+            expr: kube_pod_container_status_waiting_reason{reason=~"CreateContainerConfigError|CreateContainerError|InvalidImageName|ErrImagePull|ImagePullBackOff"} == 1
+            for: 5m
+            labels:
+              severity: critical
+              topic: kubernetes
+            annotations:
+              summary: "Pod travado em erro: {{ $labels.pod }}"
+              description: "{{ $labels.namespace }}/{{ $labels.pod }} esta em {{ $labels.reason }} ha mais de 5m. Verifique secrets/configmaps ou imagem."
+
+          - alert: PodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total[15m]) * 900 > 3
+            for: 5m
+            labels:
+              severity: warning
+              topic: kubernetes
+            annotations:
+              summary: "Pod em CrashLoop: {{ $labels.pod }}"
+              description: "{{ $labels.namespace }}/{{ $labels.pod }} reiniciou mais de 3x nos ultimos 15m."
+
+          - alert: KineWALGrowing
+            expr: kine_wal_size_bytes > 10000000
+            for: 5m
+            labels:
+              severity: critical
+              topic: kubernetes
+            annotations:
+              summary: "WAL do kine acima de 10MB"
+              description: "WAL em {{ $value | humanize1024 }}B. IO do disco vai saturar. Reinicie o k3s para forcar checkpoint."
+
+          - alert: ClusterDiskHigh
+            expr: (1 - node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}) * 100 > 80
+            for: 10m
+            labels:
+              severity: critical
+              topic: kubernetes
+            annotations:
+              summary: "Disco do cluster acima de 80%"
+              description: "Disco em {{ $value | printf \"%.1f\" }}%. WAL do kine pode crescer descontrolado."
