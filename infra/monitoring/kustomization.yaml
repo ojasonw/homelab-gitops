@@ -7,4 +7,5 @@ resources:
   - vmalert/base
   - alertmanager/base
   - grafana/base
+  - kube-state-metrics/base
   - pihole/base
