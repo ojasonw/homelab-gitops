@@ -217,12 +217,6 @@ data:
         interval: 30s
         rules:
           - alert: PodStuckInError
-            expr: kube_pod_container_status_waiting_reason{reason=~CreateContainerConfigError
-
-      - name: kubernetes.rules
-        interval: 30s
-        rules:
-          - alert: PodStuckInError
             expr: kube_pod_container_status_waiting_reason{reason=~"CreateContainerConfigError|CreateContainerError|InvalidImageName|ErrImagePull|ImagePullBackOff"} == 1
             for: 5m
             labels:
