@@ -18,15 +18,14 @@ data:
       repeat_interval: 1d
       receiver: default
       routes:
-        - receiver: telegram-main
+        - receiver: telegram-no-resolved
           matchers:
             - alertname="Validator"
             - topic="test"
           repeat_interval: 1h
 
-        - receiver: telegram-main
+        - receiver: telegram-no-resolved
           matchers:
-            - severity="info"
             - topic="speedtest"
           group_wait: 30s
           group_interval: 2m
@@ -46,4 +45,12 @@ data:
           - bot_token_file: /etc/alertmanager/secrets/bot_token
             chat_id: -1003272665821
             parse_mode: HTML
+            message: '{{ template "telegram.default.message" . }}'
+
+      - name: telegram-no-resolved
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/bot_token
+            chat_id: -1003272665821
+            parse_mode: HTML
+            send_resolved: false
             message: '{{ template "telegram.default.message" . }}'
