@@ -116,7 +116,8 @@ spec:
             - name: prompts
               mountPath: /app/prompts
             - name: google-sa
-              mountPath: /run/secrets
+              mountPath: /app/secrets/google-sa.json
+              subPath: google-sa.json
               readOnly: true
       volumes:
         - name: claude-auth
