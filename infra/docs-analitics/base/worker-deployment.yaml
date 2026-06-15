@@ -109,7 +109,7 @@ spec:
               memory: 512Mi
             limits:
               cpu: "1"
-              memory: 3Gi
+              memory: 4Gi
           volumeMounts:
             - name: claude-auth
               mountPath: /opt/claude-home

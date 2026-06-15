@@ -6,7 +6,7 @@ metadata:
   labels:
     app: kube-state-metrics
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: kube-state-metrics

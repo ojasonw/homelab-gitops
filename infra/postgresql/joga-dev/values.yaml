@@ -2,6 +2,9 @@ auth:
   postgresPassword: "devpassword123"
   database: joga-db-dev
 
+primary:
+  replicaCount: 0
+
 persistence:
   enabled: true
   storageClass: custom-local-path
