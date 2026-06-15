@@ -5,3 +5,9 @@ namespace: joga-together
 
 resources:
   - ../../base
+
+replicas:
+  - name: joga-together-backend
+    count: 0
+  - name: joga-together-frontend
+    count: 0
