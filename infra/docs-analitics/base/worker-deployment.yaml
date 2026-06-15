@@ -13,6 +13,8 @@ spec:
       labels:
         app: docs-analitics-worker
     spec:
+      imagePullSecrets:
+        - name: docs-analitics-registry
       containers:
         - name: worker
           image: ojasonw/docs-analitics-worker:latest
