@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docs-analitics-postgres-init
+  namespace: docs-analitics
+data:
+  init.sql: |
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+    CREATE TABLE IF NOT EXISTS executions (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        execution_id    TEXT UNIQUE NOT NULL,
+        file_id         TEXT NOT NULL,
+        file_name       TEXT,
+        file_hash       TEXT,
+        client_name     TEXT DEFAULT 'geral',
+        status          TEXT NOT NULL CHECK (status IN ('pending', 'processing', 'completed', 'error', 'validated', 'rejected')),
+        analysis_type   TEXT,
+        started_at      TIMESTAMPTZ,
+        completed_at    TIMESTAMPTZ,
+        validated_at    TIMESTAMPTZ,
+        validated_by    TEXT,
+        model           TEXT,
+        tokens_used     INTEGER,
+        result          JSONB,
+        error_message   TEXT,
+        prompt_version  TEXT,
+        created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_executions_file_hash ON executions(file_hash);
+    CREATE INDEX IF NOT EXISTS idx_executions_status ON executions(status);
+    CREATE INDEX IF NOT EXISTS idx_executions_created_at ON executions(created_at DESC);

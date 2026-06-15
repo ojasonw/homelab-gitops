@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docs-analitics-postgres-data
+  namespace: docs-analitics
+spec:
+  storageClassName: custom-local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docs-analitics-claude-auth
+  namespace: docs-analitics
+spec:
+  storageClassName: custom-local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

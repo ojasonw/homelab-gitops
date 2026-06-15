@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: docs-analitics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docs-analitics-worker
+  template:
+    metadata:
+      labels:
+        app: docs-analitics-worker
+    spec:
+      containers:
+        - name: worker
+          image: ojasonw/docs-analitics-worker:latest
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: HOME
+              value: /opt/claude-home
+            # --- database ---
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@docs-analitics-postgres:5432/ia_pipeline"
+            # --- auth ---
+            - name: WORKER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: WORKER_SECRET
+            # --- google drive ---
+            - name: GOOGLE_SA_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: GOOGLE_SA_PATH
+            - name: DRIVE_FOLDER_PENDENTE
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: DRIVE_FOLDER_PENDENTE
+            - name: DRIVE_FOLDER_PROCESSANDO
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: DRIVE_FOLDER_PROCESSANDO
+            - name: DRIVE_FOLDER_PROCESSADO
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: DRIVE_FOLDER_PROCESSADO
+            - name: DRIVE_FOLDER_VALIDAR
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: DRIVE_FOLDER_VALIDAR
+            - name: DRIVE_FOLDER_ERRO
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: DRIVE_FOLDER_ERRO
+            # --- claude ---
+            - name: CLAUDE_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: CLAUDE_MODEL
+            # --- timeouts ---
+            - name: TIMEOUT_CSV
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: TIMEOUT_CSV
+            - name: TIMEOUT_PDF
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: TIMEOUT_PDF
+            - name: TIMEOUT_DOCX
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: TIMEOUT_DOCX
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1.5Gi
+          volumeMounts:
+            - name: claude-auth
+              mountPath: /opt/claude-home
+            - name: prompts
+              mountPath: /app/prompts
+            - name: google-sa
+              mountPath: /run/secrets
+              readOnly: true
+      volumes:
+        - name: claude-auth
+          persistentVolumeClaim:
+            claimName: docs-analitics-claude-auth
+        - name: prompts
+          configMap:
+            name: docs-analitics-prompts
+        - name: google-sa
+          secret:
+            secretName: docs-analitics-secrets
+            items:
+              - key: GOOGLE_SA_JSON
+                path: google-sa.json
