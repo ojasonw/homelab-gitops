@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: n8n-secrets
                   key: POSTGRES_PASSWORD
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-secrets
+                  key: GITHUB_TOKEN
           volumeMounts:
             - name: n8n-data
               mountPath: /home/node/.n8n
