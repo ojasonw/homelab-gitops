@@ -15,7 +15,7 @@ images:
 
 replicas:
   - name: joga-together-backend
-    count: 1
+    count: 0
   - name: joga-together-frontend
     count: 1
 
