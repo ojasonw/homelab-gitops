@@ -38,6 +38,11 @@ spec:
                 secretKeyRef:
                   name: docs-analitics-secrets
                   key: WORKER_SECRET
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: ANTHROPIC_API_KEY
             # --- google drive ---
             - name: GOOGLE_SA_PATH
               valueFrom:
