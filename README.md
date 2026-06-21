@@ -69,8 +69,7 @@ Helm values específicos daquela VM. Sem valores aqui = chart sobe com defaults.
 
 | VM | Cluster | Apps |
 |----|---------|------|
-| `core-k3s` | k3s standalone | monitoring, n8n, cloudflare-tunnel, joga-together, web-page |
-| `monitoring` | k3s standalone | victoriametrics, grafana |
+| `monitoring` | k3s standalone | victoriametrics, grafana, alertmanager, vmagent, vmalert, n8n, cloudflare-tunnel, joga-together, web-page |
 | `dev` | k3s standalone | localstack |
 | `homolog` | k3s standalone | — |
 

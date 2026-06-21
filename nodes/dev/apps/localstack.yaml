@@ -25,4 +25,4 @@ spec:
       - CreateNamespace=true
   helm:
     valueFiles:
-      - $values/nodes/homelab-dev/values/localstack.yaml
+      - $values/nodes/dev/values/localstack.yaml

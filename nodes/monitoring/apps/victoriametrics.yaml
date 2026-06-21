@@ -25,4 +25,4 @@ spec:
       - CreateNamespace=true
   helm:
     valueFiles:
-      - $values/nodes/homelab-monitoring/values/victoriametrics.yaml
+      - $values/nodes/monitoring/values/victoriametrics.yaml
