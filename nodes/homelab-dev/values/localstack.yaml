@@ -1,0 +1,5 @@
+startServices: "s3,sqs,sns,dynamodb,lambda"
+
+persistence:
+  enabled: true
+  size: 10Gi

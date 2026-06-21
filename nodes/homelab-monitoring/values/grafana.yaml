@@ -1,0 +1,9 @@
+adminPassword: ""  # injetado via ExternalSecret
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+grafana.ini:
+  server:
+    root_url: https://grafana.artjason.com
