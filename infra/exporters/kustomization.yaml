@@ -4,5 +4,4 @@ resources:
   - node-exporter/base
   - speedtest-exporter/base
   - pve-exporter/base
-  - pihole-exporter/base
   - external-services/base

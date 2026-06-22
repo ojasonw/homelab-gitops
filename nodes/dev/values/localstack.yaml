@@ -1,3 +1,5 @@
+replicaCount: 0
+
 startServices: "s3,sqs,sns,dynamodb,lambda"
 
 persistence:
