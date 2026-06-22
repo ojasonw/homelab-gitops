@@ -11,6 +11,9 @@ spec:
     - repoURL: https://grafana.github.io/helm-charts
       chart: grafana
       targetRevision: "8.x"
+      helm:
+        valueFiles:
+          - $values/infra/monitoring/grafana/values.yaml
     - repoURL: https://github.com/ojasonw/homelab-gitops.git
       targetRevision: main
       ref: values
@@ -23,6 +26,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  helm:
-    valueFiles:
-      - $values/infra/monitoring/grafana/values.yaml

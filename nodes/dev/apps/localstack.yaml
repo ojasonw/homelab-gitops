@@ -11,6 +11,9 @@ spec:
     - repoURL: https://helm.localstack.cloud
       chart: localstack
       targetRevision: "0.x"
+      helm:
+        valueFiles:
+          - $values/nodes/dev/values/localstack.yaml
     - repoURL: https://github.com/ojasonw/homelab-gitops.git
       targetRevision: main
       ref: values
@@ -23,6 +26,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  helm:
-    valueFiles:
-      - $values/nodes/dev/values/localstack.yaml

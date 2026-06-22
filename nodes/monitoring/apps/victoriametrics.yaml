@@ -11,6 +11,9 @@ spec:
     - repoURL: https://victoriametrics.github.io/helm-charts
       chart: victoria-metrics-single
       targetRevision: "0.x"
+      helm:
+        valueFiles:
+          - $values/nodes/monitoring/values/victoriametrics.yaml
     - repoURL: https://github.com/ojasonw/homelab-gitops.git
       targetRevision: main
       ref: values
@@ -23,6 +26,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  helm:
-    valueFiles:
-      - $values/nodes/monitoring/values/victoriametrics.yaml
