@@ -138,16 +138,11 @@ spec:
               cpu: "1"
               memory: 4Gi
           volumeMounts:
-            - name: prompts
-              mountPath: /app/prompts
             - name: google-sa
               mountPath: /app/secrets/google-sa.json
               subPath: google-sa.json
               readOnly: true
       volumes:
-        - name: prompts
-          configMap:
-            name: ia-automation-prompts
         - name: google-sa
           secret:
             secretName: ia-automation-secrets

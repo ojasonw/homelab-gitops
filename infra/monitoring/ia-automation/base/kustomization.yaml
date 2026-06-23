@@ -7,6 +7,5 @@ resources:
   - postgres-init-configmap.yaml
   - postgres-statefulset.yaml
   - postgres-service.yaml
-  - prompts-configmap.yaml
   - worker-deployment.yaml
   - worker-service.yaml
