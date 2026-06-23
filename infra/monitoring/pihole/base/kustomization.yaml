@@ -5,3 +5,5 @@ resources:
   - externalsecret.yaml
   - deployment.yaml
   - service.yaml
+  - exporter-deployment.yaml
+  - exporter-service.yaml
