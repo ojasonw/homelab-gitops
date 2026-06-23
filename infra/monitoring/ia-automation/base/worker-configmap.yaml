@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ia-automation-worker-config
+  namespace: monitoring
+data:
+  GOOGLE_SA_PATH: /app/secrets/google-sa.json
+  GEMINI_MODEL: gemini-2.5-pro
+  # Google Drive folder IDs
+  DRIVE_FOLDER_PENDENTE: 1P3u6xqUEWMMv57lEdDNLhKH5O6jwaP_M
+  DRIVE_FOLDER_PROCESSANDO: 1kDD47j6SoEEstSff0B69fzMDM7xZ9oAa
+  DRIVE_FOLDER_PROCESSADO: 15af6f_TSsiYi6gBYxFNd9WVf8MXZSKLz
+  DRIVE_FOLDER_VALIDAR: 1qj1FZx_8ROjV5Hec-Jf__5Xg_kdVTWde
+  DRIVE_FOLDER_ERRO: 1oG5d4BtB2UGIPqYmur92wsq4T490tDmg
+  # Timeouts (seconds)
+  TIMEOUT_CSV: "120"
+  TIMEOUT_PDF: "300"
+  TIMEOUT_DOCX: "600"
+  # Web UI
+  WEB_USERNAME: admin
+  # n8n integration
+  N8N_WEBHOOK_URL: ""
+  N8N_API_URL: http://n8n:5678
+  # SMTP
+  APP_MAIL_USER: ""
+  APP_MAIL_HOST: smtp.gmail.com
+  APP_MAIL_PORT: "587"

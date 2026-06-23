@@ -7,3 +7,4 @@ resources:
   - vmalert/base
   - alertmanager/base
   - kube-state-metrics/base
+  - ia-automation/base

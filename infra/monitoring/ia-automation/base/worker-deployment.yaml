@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ia-automation-worker
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ia-automation-worker
+  template:
+    metadata:
+      labels:
+        app: ia-automation-worker
+    spec:
+      imagePullSecrets:
+        - name: ia-automation-registry
+      containers:
+        - name: worker
+          image: ojasonw/docs-analitics-worker:latest
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: HOME
+              value: /opt/claude-home
+            # --- database ---
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@ia-automation-postgres:5432/ia_pipeline"
+            # --- gemini ---
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: GEMINI_API_KEY
+            - name: GEMINI_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: GEMINI_MODEL
+            # --- web ui ---
+            - name: WEB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: WEB_SECRET
+            - name: WEB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: WEB_PASSWORD
+            - name: WEB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: WEB_USERNAME
+            # --- n8n ---
+            - name: N8N_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: N8N_API_KEY
+            - name: N8N_WEBHOOK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: N8N_WEBHOOK_URL
+            - name: N8N_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: N8N_API_URL
+            # --- smtp ---
+            - name: APP_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: APP_MAIL_PASSWORD
+            - name: APP_MAIL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: APP_MAIL_USER
+            - name: APP_MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: APP_MAIL_HOST
+            - name: APP_MAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: APP_MAIL_PORT
+            # --- google drive ---
+            - name: GOOGLE_SA_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: GOOGLE_SA_PATH
+            - name: DRIVE_FOLDER_PENDENTE
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PENDENTE
+            - name: DRIVE_FOLDER_PROCESSANDO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PROCESSANDO
+            - name: DRIVE_FOLDER_PROCESSADO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PROCESSADO
+            - name: DRIVE_FOLDER_VALIDAR
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_VALIDAR
+            - name: DRIVE_FOLDER_ERRO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_ERRO
+            # --- timeouts ---
+            - name: TIMEOUT_CSV
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: TIMEOUT_CSV
+            - name: TIMEOUT_PDF
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: TIMEOUT_PDF
+            - name: TIMEOUT_DOCX
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: TIMEOUT_DOCX
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 4Gi
+          volumeMounts:
+            - name: claude-auth
+              mountPath: /opt/claude-home
+            - name: prompts
+              mountPath: /app/prompts
+            - name: google-sa
+              mountPath: /app/secrets/google-sa.json
+              subPath: google-sa.json
+              readOnly: true
+      volumes:
+        - name: claude-auth
+          persistentVolumeClaim:
+            claimName: ia-automation-claude-auth
+        - name: prompts
+          configMap:
+            name: ia-automation-prompts
+        - name: google-sa
+          secret:
+            secretName: ia-automation-secrets
+            items:
+              - key: GOOGLE_SA_JSON
+                path: google-sa.json
