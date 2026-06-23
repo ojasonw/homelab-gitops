@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-exporter-script
+  namespace: monitoring
+data:
+  exporter.py: |
+    #!/usr/bin/env python3
+    import os
+    import json
+    import time
+    import threading
+    import http.server
+    import urllib.request
+    import urllib.error
+
+    HOST = os.environ.get("PIHOLE_HOSTNAME", "localhost")
+    PORT = os.environ.get("PIHOLE_PORT", "80")
+    PROTOCOL = os.environ.get("PIHOLE_PROTOCOL", "http")
+    PASSWORD = os.environ.get("PIHOLE_PASSWORD", "")
+    LISTEN = int(os.environ.get("PORT", "9617"))
+    BASE = f"{PROTOCOL}://{HOST}:{PORT}"
+
+    class Auth:
+        def __init__(self):
+            self._sid = None
+            self._expires = 0
+            self._lock = threading.Lock()
+
+        def sid(self):
+            with self._lock:
+                if self._sid and time.time() < self._expires - 60:
+                    return self._sid
+                self._sid = self._login()
+                self._expires = time.time() + 1800
+                return self._sid
+
+        def _login(self):
+            try:
+                body = json.dumps({"password": PASSWORD}).encode()
+                req = urllib.request.Request(
+                    f"{BASE}/api/auth",
+                    data=body,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    data = json.loads(r.read())
+                    session = data.get("session", {})
+                    if session.get("valid"):
+                        print(f"Auth ok, sid={session['sid'][:8]}...")
+                        return session["sid"]
+                    print(f"Auth rejected: {data}")
+            except Exception as e:
+                print(f"Auth error: {e}")
+            return None
+
+    _auth = Auth()
+
+    def api(path):
+        sid = _auth.sid()
+        headers = {"X-FTL-SID": sid} if sid else {}
+        try:
+            req = urllib.request.Request(f"{BASE}{path}", headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return json.loads(r.read())
+        except Exception as e:
+            print(f"API {path} error: {e}")
+            return {}
+
+    def metrics():
+        out = []
+
+        def g(name, help_, val, labels=None):
+            out.append(f"# HELP {name} {help_}")
+            out.append(f"# TYPE {name} gauge")
+            if labels:
+                lblstr = ",".join(f'{k}="{v}"' for k, v in labels.items())
+                out.append(f"{name}{{{lblstr}}} {val}")
+            else:
+                out.append(f"{name} {val}")
+
+        summary = api("/api/stats/summary")
+        q = summary.get("queries", {})
+
+        g("pihole_dns_queries_today", "Total DNS queries today", q.get("total", 0))
+        g("pihole_ads_blocked_today", "Ads blocked today", q.get("blocked", 0))
+        g("pihole_ads_percentage_today", "Percentage of ads blocked today", q.get("percent_blocked", 0))
+        g("pihole_unique_domains", "Unique domains queried today", q.get("unique_domains", 0))
+        g("pihole_unique_clients", "Unique clients", summary.get("clients", {}).get("total", 0))
+        g("pihole_domains_blocked", "Domains on gravity blocklist", summary.get("gravity", {}).get("domains_being_blocked", 0))
+        g("pihole_queries_forwarded", "Queries forwarded to upstream", q.get("forwarded", 0))
+        g("pihole_queries_cached", "Queries answered from cache", q.get("cached", 0))
+
+        # Query types from summary
+        types = q.get("types", {})
+        if types:
+            out.append("# HELP pihole_querytypes DNS query types")
+            out.append("# TYPE pihole_querytypes gauge")
+            for qtype, count in types.items():
+                out.append(f'pihole_querytypes{{type="{qtype}"}} {count}')
+
+        # Query status breakdown
+        status = q.get("status", {})
+        if status:
+            out.append("# HELP pihole_reply_types DNS reply status counts")
+            out.append("# TYPE pihole_reply_types gauge")
+            for stype, count in status.items():
+                out.append(f'pihole_reply_types{{status="{stype}"}} {count}')
+
+        # Top domains
+        top = api("/api/stats/top_domains")
+        domains = top.get("domains", [])
+        if domains:
+            out.append("# HELP pihole_top_queries Top queried domains")
+            out.append("# TYPE pihole_top_queries gauge")
+            for item in domains:
+                d = item.get("domain", "").replace('"', '')
+                out.append(f'pihole_top_queries{{domain="{d}"}} {item.get("count", 0)}')
+
+        # Top blocked
+        top_blocked = api("/api/stats/top_domains?blocked=true")
+        blocked = top_blocked.get("domains", [])
+        if blocked:
+            out.append("# HELP pihole_top_ads Top blocked domains")
+            out.append("# TYPE pihole_top_ads gauge")
+            for item in blocked:
+                d = item.get("domain", "").replace('"', '')
+                out.append(f'pihole_top_ads{{domain="{d}"}} {item.get("count", 0)}')
+
+        return "\n".join(out) + "\n"
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = metrics().encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, fmt, *args):
+            pass
+
+    if __name__ == "__main__":
+        print(f"pihole-exporter-v6 listening on :{LISTEN} → {BASE}")
+        http.server.HTTPServer(("", LISTEN), Handler).serve_forever()
