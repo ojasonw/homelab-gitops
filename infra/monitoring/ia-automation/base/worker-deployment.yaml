@@ -22,8 +22,6 @@ spec:
             - name: http
               containerPort: 8000
           env:
-            - name: HOME
-              value: /opt/claude-home
             - name: GOOGLE_SA_PATH
               value: /app/secrets/google-sa.json
             # DATABASE_URL uses service name — constructed here, password from secret
@@ -140,8 +138,6 @@ spec:
               cpu: "1"
               memory: 4Gi
           volumeMounts:
-            - name: claude-auth
-              mountPath: /opt/claude-home
             - name: prompts
               mountPath: /app/prompts
             - name: google-sa
@@ -149,9 +145,6 @@ spec:
               subPath: google-sa.json
               readOnly: true
       volumes:
-        - name: claude-auth
-          persistentVolumeClaim:
-            claimName: ia-automation-claude-auth
         - name: prompts
           configMap:
             name: ia-automation-prompts
