@@ -5,9 +5,10 @@ metadata:
   namespace: monitoring
 spec:
   selector:
-    app: victoriametrics
+    app.kubernetes.io/name: victoria-metrics-single
+    app.kubernetes.io/instance: victoriametrics
   ports:
     - name: http
       port: 8428
-      targetPort: http
+      targetPort: 8428
   type: ClusterIP
