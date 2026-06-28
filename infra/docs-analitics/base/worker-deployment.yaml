@@ -69,12 +69,44 @@ spec:
                 configMapKeyRef:
                   name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_ERRO
-            # --- claude ---
-            - name: CLAUDE_MODEL
+            # --- gemini ---
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: GEMINI_API_KEY
+            - name: GEMINI_MODEL
               valueFrom:
                 configMapKeyRef:
                   name: docs-analitics-worker-config
-                  key: CLAUDE_MODEL
+                  key: GEMINI_MODEL
+            # --- auth ---
+            - name: WEB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: WEB_SECRET
+            - name: OWNER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: OWNER_USERNAME
+            - name: OWNER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: OWNER_PASSWORD
+            # --- n8n ---
+            - name: N8N_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: N8N_API_KEY
+            - name: N8N_WEBHOOK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: N8N_WEBHOOK_URL
             # --- timeouts ---
             - name: TIMEOUT_CSV
               valueFrom:

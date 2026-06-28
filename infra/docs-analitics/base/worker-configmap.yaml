@@ -5,7 +5,8 @@ metadata:
   namespace: docs-analitics
 data:
   GOOGLE_SA_PATH: /app/secrets/google-sa.json
-  CLAUDE_MODEL: claude-sonnet-4-6
+  GEMINI_MODEL: "gemini-2.5-pro"
+  N8N_WEBHOOK_URL: "http://n8n:5678/webhook/trigger-analise"
   DRIVE_FOLDER_PENDENTE: 1P3u6xqUEWMMv57lEdDNLhKH5O6jwaP_M
   DRIVE_FOLDER_PROCESSANDO: 1kDD47j6SoEEstSff0B69fzMDM7xZ9oAa
   DRIVE_FOLDER_PROCESSADO: 15af6f_TSsiYi6gBYxFNd9WVf8MXZSKLz
