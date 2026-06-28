@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ia-automation-worker-logs
+  name: docs-analitics-worker-logs
   namespace: monitoring
 spec:
   storageClassName: custom-local-path

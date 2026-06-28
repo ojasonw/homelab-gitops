@@ -8,4 +8,4 @@ resources:
   - alertmanager/base
   - kube-state-metrics/base
   - pihole/base
-  - ia-automation/base
+  - docs-analitics/base

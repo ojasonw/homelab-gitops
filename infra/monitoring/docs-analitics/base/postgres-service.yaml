@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ia-automation-postgres
+  name: docs-analitics-postgres
   namespace: monitoring
 spec:
   selector:
-    app: ia-automation-postgres
+    app: docs-analitics-postgres
   ports:
     - name: pg
       port: 5432

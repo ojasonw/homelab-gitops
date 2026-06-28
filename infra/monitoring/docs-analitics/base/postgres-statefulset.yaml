@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: ia-automation-postgres
+  name: docs-analitics-postgres
   namespace: monitoring
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ia-automation-postgres
-  serviceName: ia-automation-postgres
+      app: docs-analitics-postgres
+  serviceName: docs-analitics-postgres
   template:
     metadata:
       labels:
-        app: ia-automation-postgres
+        app: docs-analitics-postgres
     spec:
       containers:
         - name: postgres
@@ -28,7 +28,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: POSTGRES_PASSWORD
           readinessProbe:
             exec:
@@ -53,4 +53,4 @@ spec:
             claimName: ia-automation-postgres-data
         - name: init-sql
           configMap:
-            name: ia-automation-postgres-init
+            name: docs-analitics-postgres-init

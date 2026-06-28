@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ia-automation-worker
+  name: docs-analitics-worker
   namespace: monitoring
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ia-automation-worker
+      app: docs-analitics-worker
   template:
     metadata:
       labels:
-        app: ia-automation-worker
+        app: docs-analitics-worker
     spec:
       imagePullSecrets:
-        - name: ia-automation-registry
+        - name: docs-analitics-registry
       initContainers:
         - name: db-init
           image: ojasonw/docs-analitics-worker:sha-5faaf2a
@@ -23,19 +23,19 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: POSTGRES_PASSWORD
             - name: DATABASE_URL
-              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@ia-automation-postgres:5432/ia_pipeline"
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@docs-analitics-postgres:5432/ia_pipeline"
             - name: OWNER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: OWNER_USERNAME
             - name: OWNER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: OWNER_PASSWORD
       containers:
         - name: worker
@@ -48,113 +48,120 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: POSTGRES_PASSWORD
             - name: DATABASE_URL
-              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@ia-automation-postgres:5432/ia_pipeline"
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@docs-analitics-postgres:5432/ia_pipeline"
             # --- auth ---
             - name: WORKER_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: WORKER_SECRET
             - name: WEB_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: WEB_SECRET
             - name: OWNER_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: OWNER_USERNAME
             - name: OWNER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: OWNER_PASSWORD
             # --- gemini ---
             - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ia-automation-secrets
+                  name: docs-analitics-secrets
                   key: GEMINI_API_KEY
-            # --- n8n ---
-            - name: N8N_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: N8N_API_KEY
-            # --- config (non-sensitive) ---
-            - name: GOOGLE_SA_PATH
-              valueFrom:
-                configMapKeyRef:
-                  name: ia-automation-worker-config
-                  key: GOOGLE_SA_PATH
             - name: GEMINI_MODEL
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: GEMINI_MODEL
-            - name: CUSTOMER_TAG
+            # --- google drive ---
+            - name: GOOGLE_SA_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
-                  key: CUSTOMER_TAG
-            - name: PROMPTS_GITHUB_REPO
-              valueFrom:
-                configMapKeyRef:
-                  name: ia-automation-worker-config
-                  key: PROMPTS_GITHUB_REPO
-            - name: PROMPTS_GITHUB_BRANCH
-              valueFrom:
-                configMapKeyRef:
-                  name: ia-automation-worker-config
-                  key: PROMPTS_GITHUB_BRANCH
+                  name: docs-analitics-worker-config
+                  key: GOOGLE_SA_PATH
             - name: DRIVE_FOLDER_PENDENTE
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_PENDENTE
             - name: DRIVE_FOLDER_PROCESSANDO
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_PROCESSANDO
             - name: DRIVE_FOLDER_PROCESSADO
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_PROCESSADO
             - name: DRIVE_FOLDER_VALIDAR
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_VALIDAR
             - name: DRIVE_FOLDER_ERRO
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: DRIVE_FOLDER_ERRO
+            # --- n8n ---
+            - name: N8N_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: N8N_API_KEY
             - name: N8N_WEBHOOK_URL
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: N8N_WEBHOOK_URL
             - name: N8N_API_URL
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: N8N_API_URL
+            # --- prompts sync ---
+            - name: CUSTOMER_TAG
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: CUSTOMER_TAG
+            - name: PROMPTS_GITHUB_REPO
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: PROMPTS_GITHUB_REPO
+            - name: PROMPTS_GITHUB_BRANCH
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: PROMPTS_GITHUB_BRANCH
+            - name: PROMPTS_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: PROMPTS_GITHUB_TOKEN
+            # --- mail (configure via /web/quota UI) ---
             - name: APP_MAIL_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: APP_MAIL_HOST
             - name: APP_MAIL_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: ia-automation-worker-config
+                  name: docs-analitics-worker-config
                   key: APP_MAIL_PORT
           readinessProbe:
             httpGet:
@@ -185,10 +192,10 @@ spec:
       volumes:
         - name: worker-logs
           persistentVolumeClaim:
-            claimName: ia-automation-worker-logs
+            claimName: docs-analitics-worker-logs
         - name: google-sa
           secret:
-            secretName: ia-automation-secrets
+            secretName: docs-analitics-secrets
             items:
               - key: GOOGLE_SA_JSON
                 path: google-sa.json

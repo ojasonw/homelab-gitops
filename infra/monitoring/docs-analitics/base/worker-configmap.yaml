@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ia-automation-worker-config
+  name: docs-analitics-worker-config
   namespace: monitoring
 data:
   GOOGLE_SA_PATH: /app/secrets/google-sa.json
