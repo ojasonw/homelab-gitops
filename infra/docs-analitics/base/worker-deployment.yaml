@@ -20,13 +20,13 @@ spec:
           image: ojasonw/docs-analitics-worker:sha-1b2d4f5
           command: ["python3", "/app/scripts/db_init.py"]
           env:
-            - name: DATABASE_URL
-              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@docs-analitics-postgres:5432/ia_pipeline"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: docs-analitics-secrets
                   key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@docs-analitics-postgres:5432/ia_pipeline"
             - name: OWNER_USERNAME
               valueFrom:
                 secretKeyRef:
