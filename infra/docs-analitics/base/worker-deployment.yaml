@@ -22,8 +22,6 @@ spec:
             - name: http
               containerPort: 8000
           env:
-            - name: HOME
-              value: /opt/claude-home
             # --- database ---
             - name: POSTGRES_PASSWORD
               valueFrom:
@@ -164,8 +162,8 @@ spec:
               cpu: "1"
               memory: 4Gi
           volumeMounts:
-            - name: claude-auth
-              mountPath: /opt/claude-home
+            - name: worker-logs
+              mountPath: /app/logs
             - name: prompts
               mountPath: /app/prompts
             - name: google-sa
@@ -173,9 +171,9 @@ spec:
               subPath: google-sa.json
               readOnly: true
       volumes:
-        - name: claude-auth
+        - name: worker-logs
           persistentVolumeClaim:
-            claimName: docs-analitics-claude-auth
+            claimName: docs-analitics-worker-logs
         - name: prompts
           emptyDir: {}
         - name: google-sa

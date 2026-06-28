@@ -23,3 +23,16 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docs-analitics-worker-logs
+  namespace: docs-analitics
+spec:
+  storageClassName: custom-local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
