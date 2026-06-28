@@ -17,7 +17,7 @@ spec:
         - name: ia-automation-registry
       containers:
         - name: worker
-          image: ojasonw/docs-analitics-worker:sha-1b2d4f5
+          image: ojasonw/docs-analitics-worker:sha-5faaf2a
           ports:
             - name: http
               containerPort: 8000
