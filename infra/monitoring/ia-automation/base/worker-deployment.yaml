@@ -15,6 +15,28 @@ spec:
     spec:
       imagePullSecrets:
         - name: ia-automation-registry
+      initContainers:
+        - name: db-init
+          image: ojasonw/docs-analitics-worker:sha-5faaf2a
+          command: ["python3", "/app/scripts/db_init.py"]
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@ia-automation-postgres:5432/ia_pipeline"
+            - name: OWNER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: OWNER_USERNAME
+            - name: OWNER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ia-automation-secrets
+                  key: OWNER_PASSWORD
       containers:
         - name: worker
           image: ojasonw/docs-analitics-worker:sha-5faaf2a
@@ -68,16 +90,16 @@ spec:
                 secretKeyRef:
                   name: ia-automation-secrets
                   key: DRIVE_FOLDER_ERRO
-            - name: WEB_USERNAME
+            - name: OWNER_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
-                  key: WEB_USERNAME
-            - name: WEB_PASSWORD
+                  key: OWNER_USERNAME
+            - name: OWNER_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
-                  key: WEB_PASSWORD
+                  key: OWNER_PASSWORD
             - name: WEB_SECRET
               valueFrom:
                 secretKeyRef:
