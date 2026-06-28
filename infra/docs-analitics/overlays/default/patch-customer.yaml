@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docs-analitics-worker-config
+data:
+  CUSTOMER_TAG: "default"
+  # Sem Drive configurado — uso local/direto apenas
+  DRIVE_FOLDER_PENDENTE: ""
+  DRIVE_FOLDER_PROCESSANDO: ""
+  DRIVE_FOLDER_PROCESSADO: ""
+  DRIVE_FOLDER_VALIDAR: ""
+  DRIVE_FOLDER_ERRO: ""

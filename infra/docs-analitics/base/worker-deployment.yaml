@@ -17,7 +17,7 @@ spec:
         - name: docs-analitics-registry
       containers:
         - name: worker
-          image: ojasonw/docs-analitics-worker:sha-461a6c8
+          image: ojasonw/docs-analitics-worker:sha-c651758
           ports:
             - name: http
               containerPort: 8000
@@ -96,6 +96,27 @@ spec:
                 secretKeyRef:
                   name: docs-analitics-secrets
                   key: OWNER_PASSWORD
+            # --- prompts sync ---
+            - name: CUSTOMER_TAG
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: CUSTOMER_TAG
+            - name: PROMPTS_GITHUB_REPO
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: PROMPTS_GITHUB_REPO
+            - name: PROMPTS_GITHUB_BRANCH
+              valueFrom:
+                configMapKeyRef:
+                  name: docs-analitics-worker-config
+                  key: PROMPTS_GITHUB_BRANCH
+            - name: PROMPTS_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: PROMPTS_GITHUB_TOKEN
             # --- n8n ---
             - name: N8N_API_KEY
               valueFrom:
@@ -156,8 +177,7 @@ spec:
           persistentVolumeClaim:
             claimName: docs-analitics-claude-auth
         - name: prompts
-          configMap:
-            name: docs-analitics-prompts
+          emptyDir: {}
         - name: google-sa
           secret:
             secretName: docs-analitics-secrets

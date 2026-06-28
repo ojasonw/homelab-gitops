@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: docs-analitics-medlivewell
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+patches:
+  - path: patch-customer.yaml
+    target:
+      kind: ConfigMap
+      name: docs-analitics-worker-config
+  - path: patch-externalsecret.yaml
+    target:
+      kind: ExternalSecret
+      name: docs-analitics-secrets

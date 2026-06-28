@@ -6,6 +6,9 @@ metadata:
 data:
   GOOGLE_SA_PATH: /app/secrets/google-sa.json
   GEMINI_MODEL: "gemini-2.5-pro"
+  CUSTOMER_TAG: "default"
+  PROMPTS_GITHUB_REPO: "ojasonw/ia-automation"
+  PROMPTS_GITHUB_BRANCH: "main"
   N8N_WEBHOOK_URL: "http://n8n:5678/webhook/trigger-analise"
   DRIVE_FOLDER_PENDENTE: 1P3u6xqUEWMMv57lEdDNLhKH5O6jwaP_M
   DRIVE_FOLDER_PROCESSANDO: 1kDD47j6SoEEstSff0B69fzMDM7xZ9oAa
