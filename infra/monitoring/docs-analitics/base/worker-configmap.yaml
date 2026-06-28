@@ -7,7 +7,7 @@ data:
   GOOGLE_SA_PATH: /app/secrets/google-sa.json
   GEMINI_MODEL: "gemini-2.5-pro"
   CUSTOMER_TAG: "default"
-  PROMPTS_GITHUB_REPO: "ojasonw/ia-automation"
+  PROMPTS_GITHUB_REPO: "ojasonw/docs-analitics"
   PROMPTS_GITHUB_BRANCH: "main"
   N8N_WEBHOOK_URL: ""
   N8N_API_URL: "https://n8n.artjason.com"
