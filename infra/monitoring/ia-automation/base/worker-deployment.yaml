@@ -44,9 +44,7 @@ spec:
             - name: http
               containerPort: 8000
           env:
-            - name: GOOGLE_SA_PATH
-              value: /app/secrets/google-sa.json
-            # DATABASE_URL uses service name — constructed here, password from secret
+            # --- database ---
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -54,42 +52,17 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DATABASE_URL
               value: "postgresql+asyncpg://ia_worker:$(POSTGRES_PASSWORD)@ia-automation-postgres:5432/ia_pipeline"
-            # --- all remaining vars from ExternalSecret ---
-            - name: GEMINI_API_KEY
+            # --- auth ---
+            - name: WORKER_SECRET
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
-                  key: GEMINI_API_KEY
-            - name: GEMINI_MODEL
+                  key: WORKER_SECRET
+            - name: WEB_SECRET
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
-                  key: GEMINI_MODEL
-            - name: DRIVE_FOLDER_PENDENTE
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: DRIVE_FOLDER_PENDENTE
-            - name: DRIVE_FOLDER_PROCESSANDO
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: DRIVE_FOLDER_PROCESSANDO
-            - name: DRIVE_FOLDER_PROCESSADO
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: DRIVE_FOLDER_PROCESSADO
-            - name: DRIVE_FOLDER_VALIDAR
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: DRIVE_FOLDER_VALIDAR
-            - name: DRIVE_FOLDER_ERRO
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: DRIVE_FOLDER_ERRO
+                  key: WEB_SECRET
             - name: OWNER_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -100,46 +73,89 @@ spec:
                 secretKeyRef:
                   name: ia-automation-secrets
                   key: OWNER_PASSWORD
-            - name: WEB_SECRET
+            # --- gemini ---
+            - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
-                  key: WEB_SECRET
-            - name: APP_MAIL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: APP_MAIL_USER
-            - name: APP_MAIL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: APP_MAIL_PASSWORD
-            - name: APP_MAIL_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: APP_MAIL_HOST
-            - name: APP_MAIL_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: APP_MAIL_PORT
-            - name: N8N_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: N8N_WEBHOOK_URL
-            - name: N8N_API_URL
-              valueFrom:
-                secretKeyRef:
-                  name: ia-automation-secrets
-                  key: N8N_API_URL
+                  key: GEMINI_API_KEY
+            # --- n8n ---
             - name: N8N_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: ia-automation-secrets
                   key: N8N_API_KEY
+            # --- config (non-sensitive) ---
+            - name: GOOGLE_SA_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: GOOGLE_SA_PATH
+            - name: GEMINI_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: GEMINI_MODEL
+            - name: CUSTOMER_TAG
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: CUSTOMER_TAG
+            - name: PROMPTS_GITHUB_REPO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: PROMPTS_GITHUB_REPO
+            - name: PROMPTS_GITHUB_BRANCH
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: PROMPTS_GITHUB_BRANCH
+            - name: DRIVE_FOLDER_PENDENTE
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PENDENTE
+            - name: DRIVE_FOLDER_PROCESSANDO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PROCESSANDO
+            - name: DRIVE_FOLDER_PROCESSADO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_PROCESSADO
+            - name: DRIVE_FOLDER_VALIDAR
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_VALIDAR
+            - name: DRIVE_FOLDER_ERRO
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: DRIVE_FOLDER_ERRO
+            - name: N8N_WEBHOOK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: N8N_WEBHOOK_URL
+            - name: N8N_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: N8N_API_URL
+            - name: APP_MAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: APP_MAIL_HOST
+            - name: APP_MAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ia-automation-worker-config
+                  key: APP_MAIL_PORT
           readinessProbe:
             httpGet:
               path: /health
@@ -160,11 +176,16 @@ spec:
               cpu: "1"
               memory: 4Gi
           volumeMounts:
+            - name: worker-logs
+              mountPath: /app/logs
             - name: google-sa
               mountPath: /app/secrets/google-sa.json
               subPath: google-sa.json
               readOnly: true
       volumes:
+        - name: worker-logs
+          persistentVolumeClaim:
+            claimName: ia-automation-worker-logs
         - name: google-sa
           secret:
             secretName: ia-automation-secrets

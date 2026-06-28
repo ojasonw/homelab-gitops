@@ -4,6 +4,7 @@ resources:
   - externalsecret.yaml
   - imagepullsecret.yaml
   - pvc.yaml
+  - worker-configmap.yaml
   - postgres-init-configmap.yaml
   - postgres-statefulset.yaml
   - postgres-service.yaml
