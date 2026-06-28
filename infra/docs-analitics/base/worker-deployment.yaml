@@ -17,7 +17,7 @@ spec:
         - name: docs-analitics-registry
       containers:
         - name: worker
-          image: ojasonw/docs-analitics-worker:sha-c651758
+          image: ojasonw/docs-analitics-worker:sha-fee773c
           ports:
             - name: http
               containerPort: 8000
