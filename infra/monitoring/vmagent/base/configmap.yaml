@@ -28,11 +28,8 @@ data:
         static_configs:
           - targets:
               - 'node-exporter.monitoring.svc:9100'
-        relabel_configs:
-          - source_labels: [__address__]
-            target_label: instance
-            regex: (.+):\d+
-            replacement: '${1}'
+            labels:
+              instance: monitoring
 
       - job_name: 'vmagent-self'
         static_configs:

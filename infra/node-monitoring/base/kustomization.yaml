@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - node-exporter-daemonset.yaml
+  - node-exporter-service.yaml
+  - vmagent-configmap.yaml
+  - vmagent-deployment.yaml
