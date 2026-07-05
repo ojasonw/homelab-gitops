@@ -4,7 +4,7 @@ image:
   repository: localstack/localstack
   tag: "4.4.0"
 
-startServices: "s3,sqs,sns,dynamodb,lambda"
+startServices: "s3,sqs,sns,dynamodb,lambda,kinesis,ecs,ssm,secretsmanager,iam,cloudformation"
 
 persistence:
   enabled: true
