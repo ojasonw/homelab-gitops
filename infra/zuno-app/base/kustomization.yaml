@@ -5,7 +5,6 @@ resources:
   - service.yaml
   - nginx-config.yaml
   - configmap.yaml
-  - clustersecretstore.yaml
   - externalsecret.yaml
   - imagepullsecret.yaml
   - postgres-secret.yaml

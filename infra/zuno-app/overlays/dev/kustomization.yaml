@@ -6,6 +6,7 @@ namespace: zuno-app-dev
 resources:
   - ../../base
   - namespace.yaml
+  - clustersecretstore.yaml
 
 # No image tag override yet — zuno-be/zuno-frontend CI only publishes
 # `latest` + commit-sha tags on `main` today (see frontend/.github/workflows/docker.yml).

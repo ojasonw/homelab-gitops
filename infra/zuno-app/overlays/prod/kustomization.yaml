@@ -5,6 +5,7 @@ namespace: zuno-app
 
 resources:
   - ../../base
+  - clustersecretstore.yaml
 
 replicas:
   - name: zuno-app-backend
