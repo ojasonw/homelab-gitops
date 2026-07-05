@@ -8,9 +8,13 @@ resources:
   - namespace.yaml
   - clustersecretstore.yaml
 
-# No image tag override yet — zuno-be/zuno-frontend CI only publishes
-# `latest` + commit-sha tags on `main` today (see frontend/.github/workflows/docker.yml).
-# Once a dev-specific tag stream exists, pin it here the way joga-together does.
+images:
+  - name: ghcr.io/zuno-webapp/zuno-be
+    newName: ojasonw/zuno-be
+    newTag: v0.0.0
+  - name: ghcr.io/zuno-webapp/zuno-frontend
+    newName: ojasonw/zuno-frontend
+    newTag: v0.0.0
 
 replicas:
   - name: zuno-app-backend
