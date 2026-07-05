@@ -1,0 +1,10 @@
+# Non-sensitive backend config — internal DNS + a well-known default DB user,
+# not credentials. Only the password and JWT secret live in Infisical
+# (see externalsecret.yaml / postgres-secret.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zuno-app-config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-prod:5432/zuno-db"
+  SPRING_DATASOURCE_USERNAME: "postgres"

@@ -1,0 +1,13 @@
+auth:
+  # Password comes from the zuno-app-postgres Secret (ExternalSecret →
+  # Infisical /zuno-app-dev/POSTGRES_PASSWORD), not plaintext here.
+  existingSecret: zuno-app-postgres
+  database: zuno-db-dev
+
+primary:
+  replicaCount: 0
+
+persistence:
+  enabled: true
+  storageClass: custom-local-path
+  size: 2Gi

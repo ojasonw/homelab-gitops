@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - nginx-config.yaml
+  - configmap.yaml
+  - clustersecretstore.yaml
+  - externalsecret.yaml
+  - imagepullsecret.yaml
+  - postgres-secret.yaml
+images:
+  - name: ghcr.io/zuno-webapp/zuno-frontend
+    newTag: latest
+  - name: ghcr.io/zuno-webapp/zuno-be
+    newTag: latest

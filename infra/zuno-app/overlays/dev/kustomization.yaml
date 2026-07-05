@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: zuno-app-dev
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+# No image tag override yet — zuno-be/zuno-frontend CI only publishes
+# `latest` + commit-sha tags on `main` today (see frontend/.github/workflows/docker.yml).
+# Once a dev-specific tag stream exists, pin it here the way joga-together does.
+
+replicas:
+  - name: zuno-app-backend
+    count: 0
+  - name: zuno-app-frontend
+    count: 0
+
+patches:
+  - path: configmap-patch.yaml
+    target:
+      kind: ConfigMap
+      name: zuno-app-config
+  - path: externalsecret-patch.yaml
+    target:
+      kind: ExternalSecret
+      name: zuno-app-secrets
+  - path: postgres-secret-patch.yaml
+    target:
+      kind: ExternalSecret
+      name: zuno-app-postgres
+  - path: imagepullsecret-patch.yaml
+    target:
+      kind: ExternalSecret
+      name: zuno-app-registry
+  - path: backend-imagepull-patch.yaml
+    target:
+      kind: Deployment
+      name: zuno-app-backend
+  - path: frontend-imagepull-patch.yaml
+    target:
+      kind: Deployment
+      name: zuno-app-frontend
