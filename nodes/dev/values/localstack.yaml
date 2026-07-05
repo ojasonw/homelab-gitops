@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: localstack/localstack
-  tag: "latest"
+  tag: "4.4.0"
 
 startServices: "s3,sqs,sns,dynamodb,lambda"
 
