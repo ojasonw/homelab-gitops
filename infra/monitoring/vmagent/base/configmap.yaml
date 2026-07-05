@@ -44,7 +44,7 @@ data:
               - 'pihole-exporter.monitoring.svc.cluster.local:9617'
 
       - job_name: 'speedtest'
-        scrape_interval: 3h
+        scrape_interval: 6h
         scrape_timeout: 5m
         static_configs:
           - targets:
