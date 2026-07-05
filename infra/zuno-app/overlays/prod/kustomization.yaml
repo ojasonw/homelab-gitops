@@ -17,3 +17,11 @@ patches:
     target:
       kind: Service
       name: zuno-app-frontend
+  - path: backend-resources-patch.yaml
+    target:
+      kind: Deployment
+      name: zuno-app-backend
+  - path: frontend-resources-patch.yaml
+    target:
+      kind: Deployment
+      name: zuno-app-frontend
