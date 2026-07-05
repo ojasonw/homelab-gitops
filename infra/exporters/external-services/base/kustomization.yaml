@@ -6,3 +6,4 @@ resources:
   - zuno-app-ext.yaml
   - docs-analitics-monville-ext.yaml
   - docs-analitics-medlivewell-ext.yaml
+  - localstack-explorer-ext.yaml
