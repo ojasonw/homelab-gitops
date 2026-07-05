@@ -3,6 +3,9 @@ image:
   tag: "17-alpine"
   pullPolicy: IfNotPresent
 
+primary:
+  replicaCount: 1
+
 auth:
   postgresPassword: ""
   database: ""
