@@ -23,9 +23,9 @@ spec:
               containerPort: 9221
           env:
             - name: PVE_USER
-              value: "monitoring@pve"
+              value: "terraform@pve"
             - name: PVE_TOKEN_NAME
-              value: "monitoring-token"
+              value: "mytoken"
             - name: PVE_VERIFY_SSL
               value: "false"
             - name: PVE_TOKEN_VALUE
