@@ -11,3 +11,7 @@ patches:
     target:
       kind: ConfigMap
       name: docs-analitics-worker-config
+  - path: worker-service-patch.yaml
+    target:
+      kind: Service
+      name: docs-analitics-worker
