@@ -12,6 +12,9 @@ spec:
     metadata:
       labels:
         app: n8n
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5678"
     spec:
       containers:
         - name: n8n
@@ -20,6 +23,8 @@ spec:
             - name: http
               containerPort: 5678
           env:
+            - name: N8N_METRICS
+              value: "true"
             - name: N8N_HOST
               value: "n8n.artjason.com"
             - name: N8N_PORT

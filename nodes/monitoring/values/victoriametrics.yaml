@@ -1,5 +1,5 @@
 server:
-  retentionPeriod: 6
+  retentionPeriod: 180
   persistentVolume:
     enabled: true
     size: 20Gi

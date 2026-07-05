@@ -15,13 +15,20 @@ spec:
       labels:
         app: vmagent
     spec:
+      serviceAccountName: vmagent
       containers:
         - name: vmagent
           image: victoriametrics/vmagent:v1.119.0
           args:
             - -remoteWrite.url=http://victoriametrics.monitoring.svc:8428/api/v1/write
+            - -remoteWrite.label=instance=%{INSTANCE_NAME}
             - -promscrape.config=/etc/vmagent-config/scrape.yml
             - -httpListenAddr=:8429
+          env:
+            - name: INSTANCE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           ports:
             - name: http
               containerPort: 8429

@@ -5,7 +5,7 @@ auth:
   database: zuno-db
 
 primary:
-  replicaCount: 0
+  replicaCount: 1
 
 persistence:
   enabled: true
