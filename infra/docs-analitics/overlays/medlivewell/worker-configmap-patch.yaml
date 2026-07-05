@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docs-analitics-worker-config
+data:
+  CUSTOMER_TAG: "medlivewell"
+  DRIVE_FOLDER_PENDENTE: "CHANGE_ME"
+  DRIVE_FOLDER_PROCESSANDO: "CHANGE_ME"
+  DRIVE_FOLDER_PROCESSADO: "CHANGE_ME"
+  DRIVE_FOLDER_VALIDAR: "CHANGE_ME"
+  DRIVE_FOLDER_ERRO: "CHANGE_ME"

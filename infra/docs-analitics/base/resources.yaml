@@ -1,8 +1,246 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: docs-analitics-secrets
+  namespace: docs-analitics
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: infisical-prod
+  target:
+    name: docs-analitics-secrets
+    creationPolicy: Owner
+    template:
+      data:
+        POSTGRES_PASSWORD: "{{ .POSTGRES_PASSWORD }}"
+        GOOGLE_SA_JSON: "{{ .GOOGLE_SA_JSON | b64dec }}"
+        GEMINI_API_KEY: "{{ .GEMINI_API_KEY }}"
+        WORKER_SECRET: "{{ .WORKER_SECRET }}"
+        WEB_SECRET: "{{ .WEB_SECRET }}"
+        OWNER_USERNAME: "{{ .OWNER_USERNAME }}"
+        OWNER_PASSWORD: "{{ .OWNER_PASSWORD }}"
+        N8N_API_KEY: "{{ .N8N_API_KEY }}"
+        PROMPTS_GITHUB_TOKEN: "{{ .PROMPTS_GITHUB_TOKEN }}"
+  data:
+    - secretKey: POSTGRES_PASSWORD
+      remoteRef:
+        key: /docs-analitics/POSTGRES_PASSWORD
+    - secretKey: GOOGLE_SA_JSON
+      remoteRef:
+        key: /docs-analitics/GOOGLE_SA_JSON
+    - secretKey: GEMINI_API_KEY
+      remoteRef:
+        key: /docs-analitics/GEMINI_API_KEY
+    - secretKey: WORKER_SECRET
+      remoteRef:
+        key: /docs-analitics/WORKER_SECRET
+    - secretKey: WEB_SECRET
+      remoteRef:
+        key: /docs-analitics/WEB_SECRET
+    - secretKey: OWNER_USERNAME
+      remoteRef:
+        key: /docs-analitics/OWNER_USERNAME
+    - secretKey: OWNER_PASSWORD
+      remoteRef:
+        key: /docs-analitics/OWNER_PASSWORD
+    - secretKey: N8N_API_KEY
+      remoteRef:
+        key: /docs-analitics/N8N_API_KEY
+    - secretKey: PROMPTS_GITHUB_TOKEN
+      remoteRef:
+        key: /docs-analitics/PROMPTS_GITHUB_TOKEN
+
+---
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: docs-analitics-registry
+  namespace: docs-analitics
+spec:
+  refreshInterval: 8h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: infisical-prod
+  target:
+    name: docs-analitics-registry
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/dockerconfigjson
+      data:
+        .dockerconfigjson: >-
+          {"auths":{"https://index.docker.io/v1/":{"username":"{{ .DOCKERHUB_USERNAME }}","password":"{{ .DOCKERHUB_TOKEN }}","auth":"{{ printf "%s:%s" .DOCKERHUB_USERNAME .DOCKERHUB_TOKEN | b64enc }}"}}}
+  data:
+    - secretKey: DOCKERHUB_USERNAME
+      remoteRef:
+        key: /docs-analitics/DOCKERHUB_USERNAME
+    - secretKey: DOCKERHUB_TOKEN
+      remoteRef:
+        key: /docs-analitics/DOCKERHUB_TOKEN
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ia-automation-postgres-data
+  namespace: docs-analitics
+spec:
+  storageClassName: custom-local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docs-analitics-worker-logs
+  namespace: docs-analitics
+spec:
+  storageClassName: custom-local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docs-analitics-postgres-init
+  namespace: docs-analitics
+data:
+  init.sql: |
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+    CREATE TABLE IF NOT EXISTS executions (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        execution_id    TEXT UNIQUE NOT NULL,
+        file_id         TEXT NOT NULL,
+        file_name       TEXT,
+        file_hash       TEXT,
+        client_name     TEXT DEFAULT 'geral',
+        status          TEXT NOT NULL CHECK (status IN ('pending', 'processing', 'completed', 'error', 'validated', 'rejected')),
+        analysis_type   TEXT,
+        started_at      TIMESTAMPTZ,
+        completed_at    TIMESTAMPTZ,
+        validated_at    TIMESTAMPTZ,
+        validated_by    TEXT,
+        model           TEXT,
+        tokens_used     INTEGER,
+        result          JSONB,
+        error_message   TEXT,
+        prompt_version  TEXT,
+        created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_executions_file_hash ON executions(file_hash);
+    CREATE INDEX IF NOT EXISTS idx_executions_status ON executions(status);
+    CREATE INDEX IF NOT EXISTS idx_executions_created_at ON executions(created_at DESC);
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs-analitics-postgres
+  namespace: docs-analitics
+spec:
+  selector:
+    app: docs-analitics-postgres
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: docs-analitics-postgres
+  namespace: docs-analitics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docs-analitics-postgres
+  serviceName: docs-analitics-postgres
+  template:
+    metadata:
+      labels:
+        app: docs-analitics-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: pg
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "ia_pipeline"
+            - name: POSTGRES_USER
+              value: "ia_worker"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docs-analitics-secrets
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "ia_worker", "-d", "ia_pipeline"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: ia-automation-postgres-data
+        - name: init-sql
+          configMap:
+            name: docs-analitics-postgres-init
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs-analitics-worker
+  namespace: docs-analitics
+spec:
+  selector:
+    app: docs-analitics-worker
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: docs-analitics-worker
-  namespace: monitoring
+  namespace: docs-analitics
 spec:
   replicas: 1
   selector:

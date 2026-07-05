@@ -5,14 +5,9 @@ namespace: docs-analitics-monville
 
 resources:
   - ../../base
-  - namespace.yaml
 
 patches:
-  - path: patch-customer.yaml
+  - path: worker-configmap-patch.yaml
     target:
       kind: ConfigMap
       name: docs-analitics-worker-config
-  - path: patch-externalsecret.yaml
-    target:
-      kind: ExternalSecret
-      name: docs-analitics-secrets
