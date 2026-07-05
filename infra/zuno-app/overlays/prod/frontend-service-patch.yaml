@@ -1,0 +1,15 @@
+# zuno-app runs on its own isolated k3s cluster (192.168.15.204) — a
+# separate cluster from where cloudflared actually lives (monitoring node).
+# NodePort makes the frontend reachable at the VM's LAN IP so the tunnel
+# can proxy to it directly, the same way it reaches proxmox-ext/pihole-ext.
+apiVersion: v1
+kind: Service
+metadata:
+  name: zuno-app-frontend
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30880

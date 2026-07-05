@@ -11,3 +11,9 @@ replicas:
     count: 1
   - name: zuno-app-frontend
     count: 1
+
+patches:
+  - path: frontend-service-patch.yaml
+    target:
+      kind: Service
+      name: zuno-app-frontend
