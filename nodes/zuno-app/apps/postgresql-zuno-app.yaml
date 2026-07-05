@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgresql-zuno-app-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/ojasonw/homelab-gitops.git
+      targetRevision: main
+      ref: valuesRepo
+    - repoURL: https://github.com/ojasonw/homelab-gitops.git
+      targetRevision: main
+      path: infra/postgresql/chart
+      helm:
+        releaseName: postgresql-zuno-app-prod
+        valueFiles:
+          - $valuesRepo/infra/postgresql/zuno-app-prod/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zuno-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

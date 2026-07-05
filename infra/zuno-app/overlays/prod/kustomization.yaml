@@ -8,6 +8,6 @@ resources:
 
 replicas:
   - name: zuno-app-backend
-    count: 0
+    count: 1
   - name: zuno-app-frontend
-    count: 0
+    count: 1

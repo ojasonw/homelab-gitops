@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zuno-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/ojasonw/homelab-gitops.git
+    targetRevision: main
+    path: infra/zuno-app/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zuno-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
