@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs-analitics-medlivewell-ext
+  namespace: monitoring
+spec:
+  ports:
+    - name: http
+      port: 30801
+      targetPort: 30801
+  type: ClusterIP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: docs-analitics-medlivewell-ext-manual
+  namespace: monitoring
+  labels:
+    kubernetes.io/service-name: docs-analitics-medlivewell-ext
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 30801
+endpoints:
+  - addresses:
+      - "192.168.15.203"
