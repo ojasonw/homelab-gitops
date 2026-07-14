@@ -1,0 +1,16 @@
+# docs-analitics-default runs on its own isolated k3s cluster (homolog,
+# 192.168.15.203) — a separate cluster from where cloudflared actually
+# lives (monitoring node). NodePort makes the worker reachable at the
+# VM's LAN IP so the tunnel can proxy to it directly, the same way it
+# reaches proxmox-ext/pihole-ext/zuno-app-ext.
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs-analitics-worker
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      nodePort: 30800
