@@ -1,0 +1,33 @@
+name: Validate Kustomize builds
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - "nodes/**"
+  pull_request:
+    paths:
+      - "infra/**"
+      - "nodes/**"
+
+jobs:
+  kustomize-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Build every kustomization directory
+        run: |
+          fail=0
+          for d in $(find . -name "kustomization.yaml" -exec dirname {} \; | sort); do
+            echo "==> $d"
+            if ! kubectl kustomize "$d" > /dev/null; then
+              echo "::error::kustomize build failed for $d"
+              fail=1
+            fi
+          done
+          exit $fail
