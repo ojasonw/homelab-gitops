@@ -255,7 +255,7 @@ spec:
         - name: docs-analitics-registry
       initContainers:
         - name: db-init
-          image: ojasonw/docs-analitics-worker:sha-9c243ac
+          image: ojasonw/docs-analitics-worker:sha-2ca055d
           command: ["python3", "/app/scripts/db_init.py"]
           env:
             - name: POSTGRES_PASSWORD
@@ -277,7 +277,7 @@ spec:
                   key: OWNER_PASSWORD
       containers:
         - name: worker
-          image: ojasonw/docs-analitics-worker:sha-9c243ac
+          image: ojasonw/docs-analitics-worker:sha-2ca055d
           ports:
             - name: http
               containerPort: 8000
