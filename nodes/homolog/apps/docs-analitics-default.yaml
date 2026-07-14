@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: docs-analitics-monville
+  name: docs-analitics-default
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/ojasonw/homelab-gitops.git
     targetRevision: main
-    path: infra/docs-analitics/overlays/monville
+    path: infra/docs-analitics/overlays/default
   destination:
     server: https://kubernetes.default.svc
-    namespace: docs-analitics-monville
+    namespace: docs-analitics-default
   syncPolicy:
     automated:
       prune: true
