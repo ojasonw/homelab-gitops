@@ -10,6 +10,7 @@ on:
     paths:
       - "infra/**"
       - "nodes/**"
+  workflow_dispatch: {}
 
 jobs:
   kustomize-build:
