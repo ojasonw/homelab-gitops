@@ -8,3 +8,7 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-prod:5432/zuno-db"
   SPRING_DATASOURCE_USERNAME: "postgres"
+  # Placeholder only — EmailService needs these to resolve at boot.
+  # TODO: move to Infisical (externalsecret.yaml) once a real SMTP account is set up.
+  EMAIL_USERNAME: "placeholder@zuno.app"
+  EMAIL_PASSWORD: "placeholder"
