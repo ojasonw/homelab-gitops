@@ -11,7 +11,7 @@ images:
     newTag: v0.0.2
   - name: ghcr.io/zuno-webapp/zuno-frontend
     newName: ojasonw/zuno-frontend
-    newTag: v0.0.0
+    newTag: v0.0.1
 replicas:
   - name: zuno-app-backend
     count: 0
