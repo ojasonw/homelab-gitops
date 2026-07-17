@@ -8,7 +8,7 @@ resources:
 images:
   - name: ghcr.io/zuno-webapp/zuno-be
     newName: ojasonw/zuno-be
-    newTag: v0.0.0
+    newTag: v0.0.2
   - name: ghcr.io/zuno-webapp/zuno-frontend
     newName: ojasonw/zuno-frontend
     newTag: v0.0.1
