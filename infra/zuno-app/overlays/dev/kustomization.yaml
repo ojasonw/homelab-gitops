@@ -1,27 +1,22 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: zuno-app-dev
-
 resources:
   - ../../base
   - namespace.yaml
   - clustersecretstore.yaml
-
 images:
   - name: ghcr.io/zuno-webapp/zuno-be
     newName: ojasonw/zuno-be
     newTag: v0.0.0
   - name: ghcr.io/zuno-webapp/zuno-frontend
     newName: ojasonw/zuno-frontend
-    newTag: v0.0.0
-
+    newTag: v0.0.1
 replicas:
   - name: zuno-app-backend
     count: 0
   - name: zuno-app-frontend
     count: 0
-
 patches:
   - path: configmap-patch.yaml
     target:
