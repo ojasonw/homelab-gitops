@@ -20,6 +20,15 @@ data:
             add_header Cache-Control "public, immutable";
         }
 
+        # Gerado em runtime a cada start do container (docker/40-generate-config.sh
+        # no repo zuno-webapp/frontend) — não pode ser cacheado como os outros
+        # .js, ou o pod novo sobe com a URL certa e o browser continua usando
+        # a antiga em cache.
+        location = /config.js {
+            add_header Cache-Control "no-store";
+            add_header Content-Type "application/javascript";
+        }
+
         location /healthz {
             access_log off;
             return 200 "ok";
