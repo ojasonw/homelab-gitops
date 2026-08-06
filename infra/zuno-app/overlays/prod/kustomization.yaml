@@ -9,9 +9,11 @@ resources:
 
 images:
   - name: ghcr.io/zuno-webapp/zuno-be
-    newTag: 3a165e66f8a75517930c5d48da27a8e464695ec5
+    newName: ojasonw/zuno-be
+    newTag: v0.0.4
   - name: ghcr.io/zuno-webapp/zuno-frontend
-    newTag: 61e801193e29da16f937441b7263b0b4ffa131e2
+    newName: ojasonw/zuno-frontend
+    newTag: v0.0.2
 
 replicas:
   - name: zuno-app-backend
