@@ -11,5 +11,4 @@ data:
   SPRING_DATASOURCE_USERNAME: "postgres"
   SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
   SUPABASE_BUCKET: "zuno-bucket"
-  # Dev value — swap for the real prod frontend domain once it exists.
-  FRONTEND_RESET_PASSWORD_URL: "http://localhost:3000/admin/redefinir-senha"
+  FRONTEND_RESET_PASSWORD_URL: "https://zuno.artjason.com/admin/redefinir-senha"
