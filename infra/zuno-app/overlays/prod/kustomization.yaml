@@ -12,8 +12,7 @@ images:
     newName: ojasonw/zuno-be
     newTag: v0.0.5
   - name: ghcr.io/zuno-webapp/zuno-frontend
-    newName: ojasonw/zuno-frontend
-    newTag: v0.0.2
+    newTag: 1b577494ee0c70b5a66c0949c8e8a2f3e35b9502
 
 replicas:
   - name: zuno-app-backend
