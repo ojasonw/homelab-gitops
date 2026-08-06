@@ -1,6 +1,7 @@
-# Non-sensitive backend config — internal DNS + a well-known default DB user,
-# not credentials. Only the password and JWT secret live in Infisical
-# (see externalsecret.yaml / postgres-secret.yaml).
+# Non-sensitive backend config — internal DNS, a well-known default DB user,
+# and other non-secret values. Credentials (DB password, JWT secret, email
+# and Supabase creds) live in Infisical instead (see externalsecret.yaml /
+# postgres-secret.yaml).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,7 +9,7 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-prod:5432/zuno-db"
   SPRING_DATASOURCE_USERNAME: "postgres"
-  # Placeholder only — EmailService needs these to resolve at boot.
-  # TODO: move to Infisical (externalsecret.yaml) once a real SMTP account is set up.
-  EMAIL_USERNAME: "placeholder@zuno.app"
-  EMAIL_PASSWORD: "placeholder"
+  SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
+  SUPABASE_BUCKET: "zuno-bucket"
+  # Dev value — swap for the real prod frontend domain once it exists.
+  FRONTEND_RESET_PASSWORD_URL: "http://localhost:3000/admin/redefinir-senha"
