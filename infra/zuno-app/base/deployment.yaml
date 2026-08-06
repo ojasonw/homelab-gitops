@@ -59,6 +59,9 @@ spec:
       containers:
       - name: zuno-app-frontend
         image: ghcr.io/zuno-webapp/zuno-frontend:latest
+        envFrom:
+        - configMapRef:
+            name: zuno-app-frontend-config
         ports:
         - containerPort: 80
         volumeMounts:
