@@ -235,6 +235,14 @@ graph LR
 
 ## Cloudflare - Configuracao
 
+> **Escopo:** esta secao descreve a zona `artjason.com` e o tunnel da VM
+> `monitoring` (`578337b6-...`), que seguem gerenciados a mao pela API.
+>
+> A zona `zunosite.com` e o tunnel `zunosite` (`0e243e71-...`, que serve os
+> tenants do cluster `zuno-app`) **nao** entram aqui: sao gerenciados por
+> Terraform, no repo `zuno-webapp/terraform`. Mexer neles pela API ou pelo
+> dashboard e revertido no proximo apply.
+
 ### Credenciais
 
 | Campo | Valor |
@@ -487,6 +495,15 @@ ssh CORE-K3S "kubectl apply -k /tmp/cloudflare-deploy/monitoring"
 ---
 
 ## Como Adicionar um Novo Servico
+
+> **Vale para `artjason.com` / tunnel da `monitoring`.**
+>
+> Para expor algo em `zunosite.com`, nao use os comandos abaixo: edite
+> `local.tunnel_routes` em `infra/live/prod/main.tf` no repo
+> `zuno-webapp/terraform`. Aquela lista e o estado desejado completo do tunnel,
+> entao uma rota criada por curl sobrevive so ate o proximo apply. O passo 2
+> tambem e dispensavel la: o CNAME curinga `*.zunosite.com` ja cobre qualquer
+> subdominio novo.
 
 ### 1. Configurar o tunnel (Cloudflare API)
 

@@ -35,8 +35,10 @@ se trata. É isso que permite o `nginx-config.yaml` ser um arquivo só.
 Duas exceções, ambas por dependência externa ao kustomize:
 
 - **Service do frontend** (`zuno-app-frontend`, `skull-frontend`): o túnel do
-  Cloudflare é por token, com o mapeamento hostname → origem no dashboard,
-  fora do git. Renomear quebra o túnel em silêncio. Fica em cada overlay,
+  Cloudflare é por token, e o mapeamento hostname → origem vive no Terraform
+  (`local.tunnel_routes` em `zuno-webapp/terraform`), fora deste repo.
+  Renomear o Service quebra o túnel em silêncio — a rota continua apontando
+  para o nome antigo até alguém atualizar o outro lado. Fica em cada overlay,
   onde o tipo também difere (NodePort vs ClusterIP).
 - **Secret do postgres** (`zuno-app-postgres`, `skull-postgres`): consumido
   pelo Application separado `postgresql-<tenant>-prod` via
