@@ -8,7 +8,7 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-skull-prod:5432/skull-db"
   SPRING_DATASOURCE_USERNAME: "postgres"
   SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
-  SUPABASE_BUCKET: "zuno-bucket"
+  SUPABASE_BUCKET: "skull-bucket"
   FRONTEND_RESET_PASSWORD_URL: "https://skull.zunosite.com/admin/redefinir-senha"
   # Same base domain as zuno-app, not a skull-specific one — TenantResolver
   # strips ".zunosite.com" off the Host header regardless of which
