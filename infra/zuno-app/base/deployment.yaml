@@ -23,6 +23,17 @@ spec:
             name: zuno-app-config
         - secretRef:
             name: zuno-app-secrets
+        env:
+        # sendHtmlMail/sendEmailForgotPassword não chamam setFrom, então o
+        # JavaMail cai em root@<hostname-do-pod> e a Hostinger devolve
+        # "450 4.1.8 Sender address rejected: Domain not found". Definir
+        # mail.from cobre o header From e o envelope. Remover quando o fix
+        # em zuno-webapp/backend#8 estiver na imagem.
+        - name: SPRING_MAIL_PROPERTIES_MAIL_FROM
+          valueFrom:
+            secretKeyRef:
+              name: zuno-app-secrets
+              key: EMAIL_USERNAME
         readinessProbe:
           tcpSocket:
             port: 8081
