@@ -11,7 +11,7 @@ metadata:
   name: config
 data:
   SPRING_DATASOURCE_USERNAME: "postgres"
-  SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
+  SUPABASE_URL: "https://snbinsplsrupqmtmcawq.supabase.co"
   # Mesmo domínio base para todos os tenants: o TenantResolver do backend tira
   # ".zunosite.com" do header Host, independentemente de qual deployment
   # responde. Cada tenant se distingue pelo username do seu Barber.
