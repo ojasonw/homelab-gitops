@@ -1,0 +1,17 @@
+# Non-sensitive backend config for the skull stack. Credentials live in
+# Infisical (see externalsecret.yaml / postgres-secret.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skull-config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-skull-prod:5432/skull-db"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
+  SUPABASE_BUCKET: "skull-bucket"
+  FRONTEND_RESET_PASSWORD_URL: "https://skull.zunosite.com/admin/redefinir-senha"
+  # Same base domain as zuno-app, not a skull-specific one — TenantResolver
+  # strips ".zunosite.com" off the Host header regardless of which
+  # deployment answers the request. Skull's own Barber account must use
+  # username "skull" for the public booking flow to resolve.
+  APP_TENANT_BASE_DOMAIN: "zunosite.com"
