@@ -15,3 +15,8 @@ data:
   # deployment answers the request. Skull's own Barber account must use
   # username "skull" for the public booking flow to resolve.
   APP_TENANT_BASE_DOMAIN: "zunosite.com"
+  # zunosite.com is hosted on Hostinger (MX mx1/mx2.hostinger.com), not
+  # Google — the smtp.gmail.com baked into application-*.properties never
+  # authenticates. Same override as infra/zuno-app/base/configmap.yaml.
+  SPRING_MAIL_HOST: "smtp.hostinger.com"
+  SPRING_MAIL_PORT: "587"

@@ -13,7 +13,7 @@ spec:
     path: infra/skull/overlays/prod
   destination:
     server: https://kubernetes.default.svc
-    namespace: skull
+    namespace: zuno-skull
   syncPolicy:
     automated:
       prune: true

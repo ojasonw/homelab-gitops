@@ -20,7 +20,7 @@ spec:
           - $valuesRepo/infra/postgresql/skull-prod/values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: skull
+    namespace: zuno-skull
   syncPolicy:
     automated:
       prune: true
