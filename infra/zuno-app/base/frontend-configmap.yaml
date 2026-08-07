@@ -6,4 +6,4 @@ kind: ConfigMap
 metadata:
   name: zuno-app-frontend-config
 data:
-  API_BASE_URL: "https://zuno.artjason.com/api"
+  API_BASE_URL: "https://zunosite.com/api"

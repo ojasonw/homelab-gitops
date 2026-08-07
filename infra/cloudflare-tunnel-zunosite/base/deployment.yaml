@@ -1,0 +1,42 @@
+# Dedicated tunnel for zunosite.com, isolated from the shared homelab tunnel
+# (infra/cloudflare-tunnel) — runs in-cluster on the zuno-app box itself.
+# CLOUDFLARE_TUNNEL_TOKEN comes from a plain Secret applied by Ansible
+# (ansible/host_vars/zuno-app), not ExternalSecret/Infisical — this token's
+# blast radius is scoped to zunosite.com only, kept separate on purpose.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared-zunosite
+  namespace: cloudflare
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared-zunosite
+  template:
+    metadata:
+      labels:
+        app: cloudflared-zunosite
+    spec:
+      containers:
+      - name: cloudflared
+        image: cloudflare/cloudflared:latest
+        args:
+        - tunnel
+        - --no-autoupdate
+        - run
+        - --token
+        - $(TUNNEL_TOKEN)
+        env:
+        - name: TUNNEL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudflare-zunosite-tunnel
+              key: CLOUDFLARE_TUNNEL_TOKEN
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
