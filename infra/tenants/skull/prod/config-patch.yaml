@@ -1,0 +1,14 @@
+# Chaves que variam por tenant. O resto vem de infra/zuno-stack/base.
+#
+# APP_TENANT_BASE_DOMAIN nao aparece aqui de proposito: e o mesmo
+# zunosite.com do base, porque o TenantResolver tira ".zunosite.com" do
+# header Host independentemente de qual deployment responde. O Barber do
+# skull precisa ter username "skull" para o fluxo publico resolver.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-skull-prod:5432/skull-db"
+  SUPABASE_BUCKET: "skull-bucket"
+  FRONTEND_RESET_PASSWORD_URL: "https://skull.zunosite.com/admin/redefinir-senha"

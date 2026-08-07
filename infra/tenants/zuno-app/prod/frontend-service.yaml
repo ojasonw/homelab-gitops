@@ -1,0 +1,21 @@
+# O cloudflared que atende zunosite.com roda em outro cluster (nó de
+# monitoring), não neste. NodePort deixa o frontend acessível pelo IP da LAN
+# da VM para o túnel proxiar direto, do mesmo jeito que ele alcança
+# proxmox-ext/pihole-ext.
+#
+# Fica fora do base porque nome e tipo variam por tenant, e porque o
+# mapeamento hostname -> origem vive no dashboard do Cloudflare (túnel por
+# token), fora do git: mudar isto aqui quebra o túnel sem aviso.
+apiVersion: v1
+kind: Service
+metadata:
+  name: zuno-app-frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30880

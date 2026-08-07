@@ -1,0 +1,23 @@
+# Config não-sensível comum a todos os tenants. Credenciais (senha do banco,
+# JWT, email e Supabase) vêm do Infisical (ver externalsecret.yaml /
+# postgres-secret.yaml).
+#
+# As chaves que variam por tenant — SPRING_DATASOURCE_URL, SUPABASE_BUCKET e
+# FRONTEND_RESET_PASSWORD_URL — são adicionadas pelo patch de cada overlay em
+# infra/tenants/<tenant>/prod/tenant-patch.yaml.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
+  # Mesmo domínio base para todos os tenants: o TenantResolver do backend tira
+  # ".zunosite.com" do header Host, independentemente de qual deployment
+  # responde. Cada tenant se distingue pelo username do seu Barber.
+  APP_TENANT_BASE_DOMAIN: "zunosite.com"
+  # zunosite.com é hospedado na Hostinger (MX mx1/mx2.hostinger.com), não no
+  # Google — o smtp.gmail.com embutido no application-*.properties do backend
+  # nunca autentica. Estas duas chaves sobrescrevem spring.mail.host/port.
+  SPRING_MAIL_HOST: "smtp.hostinger.com"
+  SPRING_MAIL_PORT: "587"

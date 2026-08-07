@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ambiente parado: replicas 0 e nenhum Application do ArgoCD aponta para cá.
+# Mantido para não perder a definição — se for reativar, crie o Application
+# em nodes/zuno-app/apps/ apontando para infra/tenants/zuno-app/dev.
+
+namespace: zuno-app-dev
+
+resources:
+  - ../../../zuno-stack/base
+  - namespace.yaml
+  - clustersecretstore.yaml
+  - frontend-service.yaml
+
+# Pin próprio: dev roda versões diferentes das de prod, então sobrescreve o
+# bloco images: do base.
+#
+# O backend casa por "ojasonw/zuno-be", não pelo nome original em ghcr.io: o
+# transformer do base roda primeiro e já aplicou o newName, então um matcher
+# no nome antigo não encontraria mais nada e o pin daqui seria ignorado em
+# silêncio. O frontend não sofre disso porque o base só troca a tag dele.
+images:
+  - name: ojasonw/zuno-be
+    newTag: v0.0.6
+  - name: ghcr.io/zuno-webapp/zuno-frontend
+    newName: ojasonw/zuno-frontend
+    newTag: v0.0.2
+
+replicas:
+  - name: backend
+    count: 0
+  - name: frontend
+    count: 0
+
+patches:
+  - path: config-patch.yaml
+  - path: frontend-config-patch.yaml
+  - path: secrets-patch.yaml
+  - path: postgres-secret-patch.yaml
+  - path: secretstore-patch.yaml
+    target:
+      kind: ExternalSecret
+  - path: backend-imagepull-patch.yaml
+  - path: frontend-imagepull-patch.yaml

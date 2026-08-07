@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zuno-app-config
-data:
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-dev:5432/zuno-db-dev"

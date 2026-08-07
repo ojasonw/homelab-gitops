@@ -1,9 +1,0 @@
-# Consumido em runtime pelo container do frontend (docker/40-generate-config.sh
-# no repo zuno-webapp/frontend), não em build-time — trocar a URL da API é só
-# editar este arquivo, sem rebuild/republish de imagem.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zuno-app-frontend-config
-data:
-  API_BASE_URL: "https://zunosite.com/api"

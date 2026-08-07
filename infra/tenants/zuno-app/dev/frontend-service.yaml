@@ -1,0 +1,14 @@
+# ClusterIP, nao NodePort: o nodePort 30880 do overlay de prod e cluster-wide
+# e colidiria. Dev nao tem entrada publica propria.
+apiVersion: v1
+kind: Service
+metadata:
+  name: zuno-app-dev-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
