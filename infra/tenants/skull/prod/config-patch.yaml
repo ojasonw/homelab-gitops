@@ -2,8 +2,7 @@
 #
 # APP_TENANT_BASE_DOMAIN nao aparece aqui de proposito: e o mesmo
 # zunosite.com do base, porque o TenantResolver tira ".zunosite.com" do
-# header Host independentemente de qual deployment responde. O Barber do
-# skull precisa ter username "skull" para o fluxo publico resolver.
+# header Host independentemente de qual deployment responde.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,3 +11,9 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-skull-prod:5432/skull-db"
   SUPABASE_BUCKET: "skull-bucket"
   FRONTEND_RESET_PASSWORD_URL: "https://skull.zunosite.com/admin/redefinir-senha"
+  # skull is an isolated single-customer deployment (one barber, one
+  # database) — requires backend v0.0.7+, which adds this fallback so the
+  # public booking flow works without the barber's username having to
+  # match the subdomain slug. zuno-app (shared multi-tenant) leaves this
+  # unset/false, since matching by username is how it picks among many.
+  APP_TENANT_SINGLE_TENANT_MODE: "true"
