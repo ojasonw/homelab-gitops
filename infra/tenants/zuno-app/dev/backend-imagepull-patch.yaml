@@ -1,0 +1,12 @@
+# Dev republica a mesma tag com frequencia; Always evita rodar imagem velha
+# em cache do no.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+      - name: backend
+        imagePullPolicy: Always

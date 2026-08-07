@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ojasonw/homelab-gitops.git
     targetRevision: main
-    path: infra/skull/overlays/prod
+    path: infra/tenants/skull/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: zuno-skull

@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ojasonw/homelab-gitops.git
     targetRevision: main
-    path: infra/zuno-app/overlays/prod
+    path: infra/tenants/zuno-app/prod
   destination:
     server: https://kubernetes.default.svc
     namespace: zuno-app

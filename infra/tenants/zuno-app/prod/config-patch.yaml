@@ -1,0 +1,9 @@
+# Chaves que variam por tenant. O resto vem de infra/zuno-stack/base.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-prod:5432/zuno-db"
+  SUPABASE_BUCKET: "zuno-bucket"
+  FRONTEND_RESET_PASSWORD_URL: "https://zunosite.com/admin/redefinir-senha"

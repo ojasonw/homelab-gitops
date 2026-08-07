@@ -1,0 +1,18 @@
+# Só o backend. O Service do frontend fica em infra/tenants/<tenant>/prod/
+# porque é o único ponto de entrada público de cada tenant: o nome e o tipo
+# variam (zuno-app usa NodePort para o cloudflared de outro cluster alcançar
+# o IP da LAN; skull usa ClusterIP porque o cloudflared roda aqui dentro), e
+# o túnel do Cloudflare aponta para eles por token, com o mapeamento no
+# dashboard — fora do git. Renomear aqui quebraria o túnel em silêncio.
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: ClusterIP

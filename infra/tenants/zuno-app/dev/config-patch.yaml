@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-dev:5432/zuno-db-dev"
+  SUPABASE_BUCKET: "zuno-bucket"
+  FRONTEND_RESET_PASSWORD_URL: "https://zunosite.com/admin/redefinir-senha"

@@ -1,0 +1,10 @@
+# Consumido em runtime pelo container do frontend (docker/40-generate-config.sh
+# no repo zuno-webapp/frontend), não em build-time — trocar a URL da API é só
+# editar o overlay, sem rebuild/republish de imagem.
+#
+# API_BASE_URL é o subdomínio do tenant e vem do patch em
+# infra/tenants/<tenant>/prod/tenant-patch.yaml.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
