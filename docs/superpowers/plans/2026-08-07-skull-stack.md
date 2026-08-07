@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - `skull-frontend` and `skull-backend` are **ClusterIP only** — no NodePort. The tunnel connector reaches them via in-cluster DNS (`skull-frontend.skull.svc.cluster.local`).
-- Namespace: `skull` (new, separate from `zuno-app`).
+- Namespace: `zuno-skull` (new, separate from `zuno-app`).
 - Images: same repo as zuno-app, `ghcr.io/zuno-webapp/zuno-be` / `ghcr.io/zuno-webapp/zuno-frontend`, starting at the same tags currently live in zuno-app prod (`v0.0.5` backend / `b6fb64899c8afff9fae34065bb699f0ec2a1f5a4` frontend) — bump independently later.
 - Infisical: same project (`externalsecrets-i-rq2`), same environment slug (`prod`), **new** secrets path `/zuno-app-prod/skulls-prod` (nested under the existing `zuno-app-prod` folder, per your setup — not a sibling top-level path).
 - Supabase: same project (same `SUPABASE_URL`), but a **new dedicated bucket** `skull-bucket` (private, mirrors `zuno-bucket`'s settings) — see Task 5 for exact steps. `SUPABASE_KEY` (the project's service key) is reused as-is; only `SUPABASE_BUCKET` changes.
@@ -77,7 +77,7 @@ spec:
           - $valuesRepo/infra/postgresql/skull-prod/values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: skull
+    namespace: zuno-skull
   syncPolicy:
     automated:
       prune: true
@@ -312,13 +312,18 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-skull-prod:5432/skull-db"
   SPRING_DATASOURCE_USERNAME: "postgres"
   SUPABASE_URL: "https://ycpxtencdkkwxzdihpqr.supabase.co"
-  SUPABASE_BUCKET: "zuno-bucket"
+  SUPABASE_BUCKET: "skull-bucket"
   FRONTEND_RESET_PASSWORD_URL: "https://skull.zunosite.com/admin/redefinir-senha"
   # Same base domain as zuno-app, not a skull-specific one — TenantResolver
   # strips ".zunosite.com" off the Host header regardless of which
   # deployment answers the request. Skull's own Barber account must use
   # username "skull" for the public booking flow to resolve.
   APP_TENANT_BASE_DOMAIN: "zunosite.com"
+  # zunosite.com is hosted on Hostinger (MX mx1/mx2.hostinger.com), not
+  # Google — the smtp.gmail.com baked into application-*.properties never
+  # authenticates. Same override as infra/zuno-app/base/configmap.yaml.
+  SPRING_MAIL_HOST: "smtp.hostinger.com"
+  SPRING_MAIL_PORT: "587"
 ```
 
 - [ ] **Step 5: Frontend ConfigMap**
@@ -551,7 +556,7 @@ spec:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: skull
+namespace: zuno-skull
 
 resources:
   - ../../base
@@ -622,7 +627,7 @@ spec:
     path: infra/skull/overlays/prod
   destination:
     server: https://kubernetes.default.svc
-    namespace: skull
+    namespace: zuno-skull
   syncPolicy:
     automated:
       prune: true
@@ -711,7 +716,7 @@ Expected: `skull` and `postgresql-skull-prod` both `Synced`/`Healthy`.
 - [ ] **Step 2: Confirm pods are running**
 
 ```bash
-ssh ubuntu@192.168.15.204 "kubectl get pods -n skull"
+ssh ubuntu@192.168.15.204 "kubectl get pods -n zuno-skull"
 ```
 Expected: `skull-backend-*`, `skull-frontend-*`, and the postgres pod all `Running`.
 
