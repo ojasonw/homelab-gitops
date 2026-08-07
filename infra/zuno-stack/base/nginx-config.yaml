@@ -10,6 +10,11 @@ data:
         root /usr/share/nginx/html;
         index index.html;
 
+        # Must match zuno-be's spring.servlet.multipart.max-file-size (3MB) —
+        # nginx's own default is 1MB, which silently 413s the barber profile
+        # photo upload before the request ever reaches the backend.
+        client_max_body_size 3M;
+
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header X-XSS-Protection "1; mode=block" always;
