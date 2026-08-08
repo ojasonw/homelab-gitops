@@ -7,3 +7,7 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-zuno-app-prod:5432/zuno-db"
   SUPABASE_BUCKET: "zuno-bucket"
   FRONTEND_RESET_PASSWORD_URL: "https://zunosite.com/admin/redefinir-senha"
+  # zuno-app e o tenant "default" — isolado, um so barbeiro (admin), mesmo
+  # desenho de deployment do skulls. Sem isso, o TenantResolver tenta casar
+  # "app" (de app.zunosite.com) como slug literal e nao acha ninguem.
+  APP_TENANT_SINGLE_TENANT_MODE: "true"
