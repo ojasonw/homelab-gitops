@@ -53,9 +53,23 @@ Copie `infra/tenants/skull/prod/` e ajuste:
 | `kustomization.yaml` | `namespace` |
 | `config-patch.yaml` | URL do banco, bucket do Supabase, domínio |
 | `clustersecretstore.yaml` | nome do store e `secretsPath` no Infisical |
+| `clustersecretstore-v2.yaml` | idem, para o store da identidade dedicada — ver nota abaixo |
 | `secretstore-patch.yaml` | nome do store |
 | `postgres-secret-patch.yaml` | nome do Secret esperado pelo chart do postgres |
 | `frontend-service.yaml` | nome e tipo do Service público |
 
 Depois crie o Application em `nodes/zuno-app/apps/<tenant>.yaml` apontando
 para `infra/tenants/<tenant>/prod`.
+
+## Migração em andamento: identidade por cliente no Infisical
+
+**Parcialmente aplicada.** Cada tenant hoje tem DOIS `ClusterSecretStore`:
+o antigo (`clustersecretstore.yaml`, ainda em uso pelos `ExternalSecret` via
+`secretstore-patch.yaml`) e um novo (`clustersecretstore-v2.yaml`), que
+aponta para uma pasta (`/zuno-clients/<tenant>`) e uma machine identity
+dedicadas no Infisical em vez da identidade `infisical-universal-auth`
+compartilhada por todo o cluster. O novo ainda não é usado por nada — falta
+o `terraform apply` do módulo `infisical-customer` (repo terraform, hoje
+bloqueado por permissão) e o bootstrap manual das credenciais no cluster.
+Runbook completo do cutover em
+[`docs/migracao-infisical-per-customer.md`](../../docs/migracao-infisical-per-customer.md).
