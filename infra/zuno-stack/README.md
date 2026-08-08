@@ -52,7 +52,6 @@ Copie `infra/tenants/skull/prod/` e ajuste:
 |---|---|
 | `kustomization.yaml` | `namespace` |
 | `config-patch.yaml` | URL do banco, bucket do Supabase, domínio |
-| `frontend-config-patch.yaml` | `API_BASE_URL` |
 | `clustersecretstore.yaml` | nome do store e `secretsPath` no Infisical |
 | `secretstore-patch.yaml` | nome do store |
 | `postgres-secret-patch.yaml` | nome do Secret esperado pelo chart do postgres |
