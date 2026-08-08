@@ -1,0 +1,13 @@
+auth:
+  # Password comes from the skulls-postgres Secret (ExternalSecret →
+  # Infisical /zuno-app-prod/skulls-prod/POSTGRES_PASSWORD), not plaintext here.
+  existingSecret: skulls-postgres
+  database: skulls-db
+
+primary:
+  replicaCount: 1
+
+persistence:
+  enabled: true
+  storageClass: custom-local-path
+  size: 8Gi

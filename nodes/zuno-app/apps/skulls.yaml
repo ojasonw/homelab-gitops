@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: skulls
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/zuno-webapp/gitops.git
+    targetRevision: main
+    path: infra/tenants/skulls/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zuno-skulls
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
