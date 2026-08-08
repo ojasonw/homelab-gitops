@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/zuno-webapp/gitops.git
+    repoURL: https://github.com/ojasonw/homelab-gitops.git
     targetRevision: main
     path: infra/tenants/skulls/prod
   destination:
