@@ -8,10 +8,10 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/zuno-webapp/gitops.git
+    - repoURL: https://github.com/ojasonw/homelab-gitops.git
       targetRevision: main
       ref: valuesRepo
-    - repoURL: https://github.com/zuno-webapp/gitops.git
+    - repoURL: https://github.com/ojasonw/homelab-gitops.git
       targetRevision: main
       path: infra/postgresql/chart
       helm:
