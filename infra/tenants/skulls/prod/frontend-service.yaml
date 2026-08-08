@@ -1,0 +1,19 @@
+# ClusterIP: o cloudflared que atende skulls.zunosite.com roda neste mesmo
+# cluster (ns cloudflare), então alcança o Service pelo DNS interno — não
+# precisa de NodePort como o zuno-app.
+#
+# Fica fora do base porque nome e tipo variam por tenant, e porque o
+# mapeamento hostname -> origem vive no dashboard do Cloudflare (túnel por
+# token), fora do git: renomear isto aqui quebra o túnel sem aviso.
+apiVersion: v1
+kind: Service
+metadata:
+  name: skulls-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

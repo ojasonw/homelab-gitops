@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: zuno-skulls
+
+resources:
+  - ../../../zuno-stack/base
+  - frontend-service.yaml
+  # Store novo da migracao para identidade dedicada — ver
+  # docs/migracao-infisical-per-customer.md. Nao usado por nenhum
+  # ExternalSecret ainda; convive com o de cima ate o cutover.
+  - clustersecretstore-v2.yaml
+
+replicas:
+  - name: backend
+    count: 1
+  - name: frontend
+    count: 1
+
+patches:
+  - path: config-patch.yaml
+  - path: postgres-secret-patch.yaml
+  - path: secretstore-patch.yaml
+    target:
+      kind: ExternalSecret
