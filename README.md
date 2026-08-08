@@ -89,9 +89,28 @@ Este repo e dono do que **roda dentro** dos clusters. Parte do que esta **fora**
 | Zona DNS `zunosite.com` | os 10 registros — tunnel, MX/SPF/DKIM/DMARC do Hostinger |
 | Tunnel `zunosite` e suas regras de ingress | o tunnel que serve os tenants no cluster `zuno-app` |
 | Bucket R2 `tf-state-zuno-prod` | state do proprio Terraform |
-| Pasta `/zuno-app-prod` no Infisical | a que o `ClusterSecretStore` do tenant zuno-app le |
+| Pastas `/zuno-clients/<cliente>` no Infisical | as que os `ClusterSecretStore` de cada cliente leem — ver abaixo |
 
 **Continua manual:** a zona `artjason.com` e o tunnel da VM `monitoring` (`578337b6-...`). O runbook de `docs/DOCS.md` vale para eles.
+
+### Migração em andamento: identidade por cliente no Infisical
+
+**Terraform aplicado, cutover do cluster pendente.** Historicamente todo
+`ClusterSecretStore` do cluster `zuno-app` autenticava no Infisical com uma
+identidade COMPARTILHADA (Secret `infisical-universal-auth`), lendo a pasta
+antiga `/zuno-app-prod` (e `/zuno-app-prod/skulls-prod` para o skull) — o
+`secretsPath` era só um filtro, não uma fronteira de acesso real. O módulo
+`infisical-customer` (repo terraform) já criou, para cada cliente
+(`default` e `skull` — o tenant `zuno-app` deste repo virou o cliente
+`default` no Infisical, ver a nota de nomenclatura no doc abaixo), pasta
+(`/zuno-clients/<cliente>`) e identidade próprias, e os Secrets
+`infisical-universal-auth-default`/`-skull` já existem no cluster.
+
+Falta só o cutover: trocar o `secretStoreRef` de cada tenant para os stores
+novos e confirmar `SecretSynced`. Os `ClusterSecretStore` novos já existem
+neste repo, lado a lado com os antigos — ver
+[`docs/migracao-infisical-per-customer.md`](docs/migracao-infisical-per-customer.md)
+para o runbook completo do cutover.
 
 ### Ao adicionar um tenant novo ao `zuno-stack`
 
