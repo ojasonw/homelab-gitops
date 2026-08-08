@@ -1,12 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 # Base única do stack Zuno (backend + frontend), compartilhada por todos os
 # tenants em infra/tenants/. Os recursos usam nomes genéricos (backend,
 # frontend, config, secrets, ...) porque cada tenant vive no seu próprio
 # namespace — não há colisão, e o nginx do frontend consegue apontar para
 # "backend" sem saber de que tenant se trata.
-
 resources:
   - deployment.yaml
   - service.yaml
@@ -16,7 +14,6 @@ resources:
   - externalsecret.yaml
   - imagepullsecret.yaml
   - postgres-secret.yaml
-
 # ÚNICO lugar onde as versões de imagem são definidas. Um bump aqui atinge
 # todos os tenants no próximo sync do ArgoCD. Para pinar um tenant numa
 # versão diferente (canário, rollback pontual), declare o bloco `images:`
@@ -26,4 +23,5 @@ images:
     newName: ojasonw/zuno-be
     newTag: v0.0.7
   - name: ghcr.io/zuno-webapp/zuno-frontend
-    newTag: b6fb64899c8afff9fae34065bb699f0ec2a1f5a4
+    newTag: v0.0.4
+    newName: ojasonw/zuno-frontend
