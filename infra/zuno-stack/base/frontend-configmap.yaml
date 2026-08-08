@@ -1,10 +1,22 @@
 # Consumido em runtime pelo container do frontend (docker/40-generate-config.sh
 # no repo zuno-webapp/frontend), não em build-time — trocar a URL da API é só
-# editar o overlay, sem rebuild/republish de imagem.
-#
-# API_BASE_URL é o subdomínio do tenant e vem do patch em
-# infra/tenants/<tenant>/prod/tenant-patch.yaml.
+# editar aqui, sem rebuild/republish de imagem.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
+data:
+  # RELATIVA, e igual para todos os tenants — não é o subdomínio do tenant.
+  #
+  # O backend descobre qual barbearia atender pelo header Host da requisição
+  # (TenantResolver tira o slug de "{slug}.zunosite.com"). Uma URL absoluta
+  # aponta todo mundo para o mesmo host, então o browser em djw.zunosite.com
+  # chamaria https://zunosite.com/api/... e o backend receberia Host:
+  # zunosite.com — sem slug nenhum, respondendo "Não foi possível identificar
+  # a barbearia a partir do domínio acessado". Era o que acontecia antes.
+  #
+  # Com "/api" a chamada é same-origin: o Host carrega o subdomínio que o
+  # cliente realmente acessou, e o nginx do próprio pod faz proxy para
+  # backend:8081 (ver nginx-config.yaml). De quebra, CORS deixa de entrar na
+  # jogada — a requisição nunca é cross-origin.
+  API_BASE_URL: "/api"

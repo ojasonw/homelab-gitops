@@ -16,7 +16,6 @@ replicas:
 
 patches:
   - path: config-patch.yaml
-  - path: frontend-config-patch.yaml
   - path: postgres-secret-patch.yaml
   - path: secretstore-patch.yaml
     target:
