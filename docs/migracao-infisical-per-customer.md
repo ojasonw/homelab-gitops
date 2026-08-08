@@ -50,163 +50,91 @@ O que ainda não resolve: isolamento de **leitura** entre clientes (`viewer`
 enxerga o path de qualquer um). Vira `scoped_role = true` quando o plano
 permitir; nada mais precisa mudar.
 
-## Status: passos 1 e 2 concluídos (2026-08-08)
+## Status: migração concluída (2026-08-08)
 
 - ✅ **Passo 1** — `terraform apply` rodou, `module.customer["default"]` e
   `module.customer["skull"]` existem no Infisical com identidade e pasta
   próprias.
 - ✅ **Passo 2** — os Secrets `infisical-universal-auth-default` e
   `infisical-universal-auth-skull` já existem no cluster (namespace
-  `external-secrets`), aplicados a partir dos outputs do apply.
-- ⏳ **Passos 3–6** — pendentes. Continue a partir do passo 3 abaixo.
+  `external-secrets`).
+- ✅ **Passo 3** — os dois stores novos confirmados `Valid`.
+- ✅ **Passo 4** — cutover feito em duas tentativas. A primeira (PR #44) quebrou
+  os 6 `ExternalSecret` (`SecretSyncedError: could not get secret data from
+  provider`) porque as pastas novas tinham só a estrutura, sem os **valores**
+  — revertida no PR #45 assim que detectado (sem impacto nos pods: o
+  ExternalSecrets Operator não limpa o Secret de destino quando o sync falha).
+  As 9 chaves de cada tenant foram copiadas de `/zuno-app-prod` e
+  `/zuno-app-prod/skulls-prod` para as pastas novas, verificadas com a
+  identidade *real* de cada cliente, e o cutover refeito com sucesso no PR #46.
+- ✅ **Passo 5** — os 6 `ExternalSecret` confirmados `SecretSynced: True` nos
+  stores novos; tamanhos dos Secrets de destino conferidos.
+- ✅ **Passo 6** — `clustersecretstore.yaml` (antigo) removido dos dois
+  overlays. O Secret compartilhado `infisical-universal-auth` **não** foi
+  removido — ainda serve o `joga-together`, fora do escopo desta migração.
 
-Os `ClusterSecretStore` novos já existem neste repo, lado a lado com os
-antigos:
+**Lição para a próxima migração de estrutura de secrets:** o passo de trocar
+o `secretStoreRef` só é seguro depois que os *valores* — não só a pasta —
+existirem no destino, e depois de verificar leitura com a identidade que vai
+ser usada de verdade em produção, não com uma identidade admin.
 
-- `infra/tenants/zuno-app/prod/clustersecretstore-v2.yaml` →
-  `infisical-default-clients`, aponta para `/zuno-clients/default`
-- `infra/tenants/skull/prod/clustersecretstore-v2.yaml` →
-  `infisical-skull-clients`, aponta para `/zuno-clients/skull`
+## Estado final
 
-Nenhum dos dois é referenciado por nenhum `ExternalSecret` ainda — os
-`secretStoreRef` em `infra/tenants/<tenant>/prod/secretstore-patch.yaml`
-continuam nos stores antigos (`infisical-zuno-app-prod`,
-`infisical-skull-prod`).
+| | |
+|---|---|
+| Store em uso | `infisical-default-clients` (zuno-app) / `infisical-skull-clients` (skull) |
+| Auth | Secret dedicado `infisical-universal-auth-default` / `-skull`, namespace `external-secrets` |
+| `secretsPath` | `/zuno-clients/default` / `/zuno-clients/skull` |
+| Role da identidade | `viewer` (built-in, não escopada por path — ver nota acima) |
+| `clustersecretstore.yaml` (antigo) | removido dos dois overlays |
+| Secret compartilhado `infisical-universal-auth` | **mantido** — ainda serve o `joga-together` |
+| Pastas antigas `/zuno-app-prod`, `/zuno-app-prod/skulls-prod` no Infisical | não apagadas pelo Terraform nem por este repo; limpeza manual futura, fora do escopo daqui |
 
-## Passo a passo do cutover
+## Runbook (para replicar em outra migração de secretStoreRef)
 
-### 1. ~~Rodar `terraform apply`~~ — feito
+Os passos, na ordem que se mostrou segura na prática:
 
-Para referência, os outputs relevantes (`infra/live/prod/outputs.tf` no repo
-terraform):
+1. **Provisionar identidade + pasta no destino** (aqui: `terraform apply` do
+   módulo `infisical-customer`).
+2. **Aplicar a credencial da identidade no cluster** — Secret bootstrap manual,
+   mesmo padrão do token do túnel Cloudflare (`infra/cloudflare-tunnel-zunosite/base/deployment.yaml`):
+   ```bash
+   kubectl create secret generic infisical-universal-auth-<cliente> \
+     -n external-secrets \
+     --from-literal=clientId='...' --from-literal=clientSecret='...' \
+     --dry-run=client -o yaml | kubectl apply -f -
+   ```
+   `--dry-run=client -o yaml | kubectl apply` em vez de `kubectl create` puro
+   evita gravar a credencial em texto plano na anotação
+   `last-applied-configuration`.
+3. **Confirmar `Valid`**: `kubectl get clustersecretstore`.
+4. **Copiar os VALORES das secrets para o path novo antes de trocar
+   `secretStoreRef`.** Este é o passo que faltou na primeira tentativa daqui e
+   quebrou produção (ver "O que deu errado" abaixo) — o Terraform só cria a
+   pasta, não os valores dentro dela.
+5. **Verificar leitura com a identidade REAL do cliente**, não com uma
+   identidade admin — a admin lê qualquer coisa e não prova que o cutover vai
+   funcionar.
+6. **Só então trocar o `secretStoreRef`** em
+   `infra/tenants/<tenant>/prod/secretstore-patch.yaml`, validar com
+   `kubectl kustomize ... | grep -A2 secretStoreRef` antes de commitar.
+7. **Confirmar `SecretSynced: True`** em todos os `ExternalSecret`, e que os
+   Secrets de destino têm as chaves esperadas.
+8. **Remover o store antigo** só depois do passo 7 confirmado — e o Secret de
+   auth compartilhado só quando *todas* as apps que o usam tiverem migrado,
+   não apenas as desta migração.
 
-```bash
-terraform output -json customer_folder_paths   # {"default": "/zuno-clients/default", "skull": "/zuno-clients/skull"}
-terraform output -json customer_client_ids     # nao-sensivel
-terraform output -json customer_client_secrets # sensivel — nao colar em canal que persiste historico
-```
+## O que deu errado na primeira tentativa (registro, não repita)
 
-### 2. ~~Criar os Secrets no cluster~~ — feito
+O cutover foi feito primeiro sem o passo 4 acima: `secretStoreRef` trocado
+para os stores novos enquanto `/zuno-clients/default` e `/zuno-clients/skull`
+tinham só a pasta, sem nenhuma secret dentro. Resultado: os 6 `ExternalSecret`
+(3 por tenant) foram para `SecretSyncedError: could not get secret data from
+provider` — o `viewer` conseguia autenticar no store, mas não tinha o que ler.
 
-Igual ao Secret `cloudflare-zunosite-tunnel` (ver o comentário em
-`infra/cloudflare-tunnel-zunosite/base/deployment.yaml`): estes Secrets **não**
-são gerenciados por ExternalSecret nem por Terraform do lado do cluster — é o
-Terraform quem gera a credencial, mas alguém precisa aplicá-la a mão. Faz
-sentido: um ExternalSecret que buscasse a credencial *da própria* identidade
-que ele usa para autenticar seria circular.
-
-Comando usado (para reaplicar se algum dia precisar rotacionar):
-
-```bash
-ssh ubuntu@192.168.15.204
-
-kubectl create secret generic infisical-universal-auth-default \
-  -n external-secrets \
-  --from-literal=clientId='<customer_client_ids["default"]>' \
-  --from-literal=clientSecret='<customer_client_secrets["default"]>' \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl create secret generic infisical-universal-auth-skull \
-  -n external-secrets \
-  --from-literal=clientId='<customer_client_ids["skull"]>' \
-  --from-literal=clientSecret='<customer_client_secrets["skull"]>' \
-  --dry-run=client -o yaml | kubectl apply -f -
-```
-
-O `--dry-run=client -o yaml | kubectl apply` (em vez de `kubectl create` puro)
-evita repetir o problema já encontrado no Secret compartilhado atual: um
-`kubectl apply` normal com `stringData` grava o manifesto inteiro — clientId e
-clientSecret em texto plano — na anotação `last-applied-configuration`,
-legível por qualquer um que possa ler Secrets no namespace, sem precisar
-decodificar base64. Esse fluxo não escreve essa anotação.
-
-### 3. Confirmar que os stores novos ficam `Valid`
-
-```bash
-kubectl get clustersecretstore
-```
-
-`infisical-default-clients` e `infisical-skull-clients` devem sair de
-`Invalid`/sem status para `Valid` assim que o External Secrets Operator
-conseguir autenticar com a credencial nova. Se continuarem inválidos, o
-`describe` do store dá o motivo exato — mas note que a identidade agora usa a
-role `viewer` (não uma role custom), então um erro de permissão aqui seria
-inesperado; mais provável ser problema no Secret (passo 2) ou algo do lado do
-Infisical (identidade revogada, etc.).
-
-### 4. Trocar o `secretStoreRef` de cada tenant
-
-Em `infra/tenants/zuno-app/prod/secretstore-patch.yaml`, trocar:
-
-```yaml
-spec:
-  secretStoreRef:
-    name: infisical-zuno-app-prod   # -> infisical-default-clients
-```
-
-E o equivalente em `infra/tenants/skull/prod/secretstore-patch.yaml`
-(`infisical-skull-prod` → `infisical-skull-clients`). Isso repassa os três
-`ExternalSecret` do base (`secrets`, `postgres-secret`, `imagepullsecret` —
-ver `infra/zuno-stack/base/kustomization.yaml`) de uma vez, via o seletor por
-`kind` já existente no `kustomization.yaml` do overlay.
-
-Se preferir uma transição mais gradual em vez de trocar os três de uma vez —
-por exemplo, um `ExternalSecret` duplicado temporário apontando para o store
-novo, rodando em paralelo com o antigo, para comparar os valores antes de
-cortar o antigo — é uma opção válida, mas **não foi aplicada aqui**: fica a
-critério de quem for rodar o cutover, e exigiria um manifesto extra (o
-`externalsecret.yaml` do base não pode ter dois `secretStoreRef` ao mesmo
-tempo, então seria necessário um overlay adicional só para o período de
-transição).
-
-Depois de editar, valide antes de commitar:
-
-```bash
-kubectl kustomize infra/tenants/zuno-app/prod | grep -A2 secretStoreRef
-kubectl kustomize infra/tenants/skull/prod    | grep -A2 secretStoreRef
-```
-
-### 5. Confirmar `SecretSynced: True`
-
-```bash
-kubectl get externalsecret -n zuno-app
-kubectl get externalsecret -n zuno-skull
-```
-
-Confira também que os valores realmente chegaram nos Secrets de destino
-(`secrets`, `postgres-secret`, `imagepullsecret`) — um `SecretSynced: True`
-com uma chave faltando ainda quebra o pod em runtime, só que mais tarde.
-
-Só depois disso os pods de `zuno-app`/`zuno-skull` devem ser reiniciados (ou
-aguardar o próximo restart natural) para pegarem os valores atualizados, já
-que os Secrets do ExternalSecrets Operator não fazem live-reload em pods já
-rodando.
-
-### 6. Remover os stores antigos e o Secret compartilhado — só quando TUDO tiver migrado
-
-Depois que o passo 5 estiver confirmado para **zuno-app e skull**:
-
-- Apagar `infra/tenants/zuno-app/prod/clustersecretstore.yaml` e a entrada
-  correspondente em `kustomization.yaml` (idem para skull)
-- **Não apagar ainda** o Secret `infisical-universal-auth` (namespace
-  `external-secrets`) nem a identidade compartilhada no Infisical. Esse
-  Secret também é usado pelo `ClusterSecretStore` do `joga-together`
-  (`infra/external-secrets/base/infisical-clustersecretstore.yaml`, stores
-  `infisical-prod`/`infisical-dev`) — um app completamente fora do escopo
-  desta migração. Só remova a identidade compartilhada quando **todas** as
-  apps do cluster tiverem sua própria identidade dedicada, não só
-  zuno-app/skull.
-
-## Coexistência durante a migração
-
-| | Store antigo | Store novo |
-|---|---|---|
-| Nome | `infisical-zuno-app-prod` / `infisical-skull-prod` | `infisical-default-clients` / `infisical-skull-clients` |
-| Auth | Secret compartilhado `infisical-universal-auth` | Secret dedicado `infisical-universal-auth-default` / `-skull` |
-| `secretsPath` | `/zuno-app-prod` / `/zuno-app-prod/skulls-prod` | `/zuno-clients/default` / `/zuno-clients/skull` |
-| Role da identidade | N/A (a mesma identidade `kubernetes` para tudo) | `viewer` (built-in, não escopada — ver nota acima) |
-| Usado por `ExternalSecret`? | Sim, até o passo 4 | Só depois do passo 4 |
-
-Os dois conjuntos de pastas no Infisical existem em paralelo até o passo 6 —
-o Terraform não apaga `/zuno-app-prod` sozinho, e este repo também não deleta
-os stores antigos antes da hora.
+Sem impacto real: o ExternalSecrets Operator não limpa o Secret de destino
+quando um sync falha, então os Secrets no cluster mantiveram os valores
+antigos e nenhum pod foi afetado. Ainda assim, revertido assim que percebido
+(voltar `secretStoreRef` para os stores antigos), os 9 pares chave/valor de
+cada tenant foram copiados via API para os paths novos, a leitura verificada
+com a identidade real de cada cliente, e só então o cutover refeito.
