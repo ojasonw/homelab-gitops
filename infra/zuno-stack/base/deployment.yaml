@@ -34,15 +34,26 @@ spec:
             secretKeyRef:
               name: secrets
               key: EMAIL_USERNAME
+        # Boot do Spring Boot 4 / Java 21 leva ~50-58s neste cluster (node
+        # unico, todos os pods de todos os tenants disputando a mesma CPU).
+        # Sem startupProbe, a liveness (antes: initialDelaySeconds 30,
+        # periodSeconds 20) as vezes matava o container poucos ms depois dele
+        # terminar de subir — "failed liveness probe" logo apos "Started
+        # ZunoBeApplication", reiniciando em loop (e, por causa do ddl-auto,
+        # apagando o banco de novo a cada uma dessas mortes). Enquanto o
+        # startupProbe nao passa, liveness/readiness nao rodam.
+        startupProbe:
+          tcpSocket:
+            port: 8081
+          periodSeconds: 5
+          failureThreshold: 30
         readinessProbe:
           tcpSocket:
             port: 8081
-          initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
           tcpSocket:
             port: 8081
-          initialDelaySeconds: 30
           periodSeconds: 20
         resources:
           requests:
