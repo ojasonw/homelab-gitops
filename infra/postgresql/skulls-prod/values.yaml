@@ -11,3 +11,14 @@ persistence:
   enabled: true
   storageClass: custom-local-path
   size: 8Gi
+
+# Sem isto o pod ficava QoS BestEffort — primeiro candidato a OOM-kill sob
+# pressão de memória no node (node tem só 4Gi). Uso observado fica em
+# ~50Mi ocioso; folga de 2-3x cobre picos de conexão/migração.
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 384Mi
