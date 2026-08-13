@@ -16,8 +16,17 @@ data:
   # ".zunosite.com" do header Host, independentemente de qual deployment
   # responde. Cada tenant se distingue pelo username do seu Barber.
   APP_TENANT_BASE_DOMAIN: "zunosite.com"
-  # zunosite.com é hospedado na Hostinger (MX mx1/mx2.hostinger.com), não no
-  # Google — o smtp.gmail.com embutido no application-*.properties do backend
-  # nunca autentica. Estas duas chaves sobrescrevem spring.mail.host/port.
+  # zunosite.com é hospedado na Hostinger (MX mx1/mx2.hostinger.com). Porta
+  # 465 (SSL implícito) porque application-local.properties do backend seta
+  # mail.smtp.ssl.enable=true (não starttls) — casado com 587 (STARTTLS) o
+  # handshake falha com "Unsupported or unrecognized SSL message".
   SPRING_MAIL_HOST: "smtp.hostinger.com"
-  SPRING_MAIL_PORT: "587"
+  SPRING_MAIL_PORT: "465"
+  # application-local.properties (perfil ativo em prod hoje, ver
+  # application.properties: spring.profiles.active=local) seta
+  # ddl-auto=create-drop — sem este override, TODO restart do backend
+  # (deploy, crash, OOM, o que for) recria o schema do zero e apaga os dados
+  # de todos os tenants. "update" é o valor que application.properties já usa
+  # pra qualquer outro perfil; sobrescreve local via env var, que tem
+  # precedência sobre application-{profile}.properties no Spring Boot.
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
