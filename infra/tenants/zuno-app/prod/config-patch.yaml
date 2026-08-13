@@ -11,3 +11,8 @@ data:
   # desenho de deployment do skulls. Sem isso, o TenantResolver tenta casar
   # "app" (de app.zunosite.com) como slug literal e nao acha ninguem.
   APP_TENANT_SINGLE_TENANT_MODE: "true"
+  # spring.mail.support (EmailService, backend >= v0.0.12) — remetente dos
+  # e-mails simples, separado do EMAIL_USERNAME que autentica no SMTP. Sem
+  # isso o contexto do Spring falha ao subir: "Could not resolve placeholder
+  # 'EMAIL_SUPPORT'".
+  EMAIL_SUPPORT: "suporte@zunosite.com"

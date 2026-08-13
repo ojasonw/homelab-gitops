@@ -17,3 +17,8 @@ data:
   # match the subdomain slug. zuno-app (shared multi-tenant) leaves this
   # unset/false, since matching by username is how it picks among many.
   APP_TENANT_SINGLE_TENANT_MODE: "true"
+  # spring.mail.support (EmailService, backend >= v0.0.13) — remetente dos
+  # e-mails simples, separado do EMAIL_USERNAME que autentica no SMTP. Sem
+  # isso o contexto do Spring falha ao subir: "Could not resolve placeholder
+  # 'EMAIL_SUPPORT'".
+  EMAIL_SUPPORT: "suporte@zunosite.com"
