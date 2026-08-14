@@ -10,10 +10,20 @@ data:
         enable: true
     routes:
       unmatched: heuristic
+    # Genérico de propósito, pra servir N apps sem editar este ConfigMap a
+    # cada um novo: em vez de listar k8s_deployment_name/k8s_namespace fixo
+    # (só cobriria o backend do zuno-app), casa por label no Pod — glob
+    # contra o valor, igual ao mecanismo de opt-in do prometheus.io/scrape
+    # já usado nos outros exporters deste repo. Cada app "se inscreve"
+    # aplicando a label no próprio template do Deployment (ver
+    # infra/tenants/<tenant>/prod/beyla-instrument-patch.yaml); nenhum tem
+    # por padrão, então nada além do que for explicitamente rotulado é
+    # instrumentado, mesmo o ClusterRole do Beyla enxergando o cluster
+    # inteiro.
     discovery:
       instrument:
-        - k8s_deployment_name: "backend"
-          k8s_namespace: "zuno-app"
+        - k8s_pod_labels:
+            beyla.grafana.com/instrument: "true"
     # Exporta como Prometheus (endpoint interno que o próprio Beyla expõe)
     prometheus_export:
       port: 8999

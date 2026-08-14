@@ -20,6 +20,7 @@ replicas:
 patches:
   - path: config-patch.yaml
   - path: postgres-secret-patch.yaml
+  - path: beyla-instrument-patch.yaml
   - path: secretstore-patch.yaml
     target:
       kind: ExternalSecret

@@ -1,0 +1,14 @@
+# Opt-in do Beyla (infra/beyla/base, discovery.instrument por k8s_pod_labels)
+# — label no template do Pod, não no Deployment em si, porque é o Pod que o
+# Beyla enxerga via eBPF/API do Kubernetes. Escopo deliberadamente restrito
+# ao backend deste tenant por enquanto; skulls entra depois, como mudança
+# separada e testada isoladamente (o mesmo patch, no overlay dele).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    metadata:
+      labels:
+        beyla.grafana.com/instrument: "true"
