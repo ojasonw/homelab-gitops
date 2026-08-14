@@ -10,6 +10,11 @@ spec:
     metadata:
       labels:
         app: backend
+        # Opt-in genérico do Beyla (infra/beyla/base,
+        # discovery.instrument por k8s_pod_labels) — na base compartilhada
+        # de propósito, pra valer pra todo cliente Zuno (zuno-app, skulls,
+        # os que vierem depois) sem precisar de patch por tenant.
+        beyla.grafana.com/instrument: "true"
     spec:
       imagePullSecrets:
         - name: ghcr-secret
