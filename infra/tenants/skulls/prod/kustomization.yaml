@@ -17,14 +17,6 @@ replicas:
   - name: frontend
     count: 1
 
-# Rollback pontual — v0.0.15 (o novo sistema de observabilidade, PR
-# zuno-webapp/backend#24) crasha em CrashLoopBackOff sem stack trace,
-# derrubou produção. Ganha da base (v0.0.15) até isolar a causa e
-# validar um fix de verdade fora de produção. Remover quando resolvido.
-images:
-  - name: ojasonw/zuno-be
-    newTag: v0.0.13
-
 patches:
   - path: config-patch.yaml
   - path: postgres-secret-patch.yaml
