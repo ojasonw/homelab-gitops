@@ -26,7 +26,7 @@ spec:
           # Tag fixa, não :latest — Beyla ainda muda rápido (eBPF, breaking
           # changes entre minors não são raras); bump de versão vira PR
           # explícito. v3.31.0 é a que foi validada no POC em produção.
-          image: grafana/beyla:v3.31.0
+          image: grafana/beyla:3.31.0
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true # forma simples pra teste; depois dá pra restringir a capabilities específicas
