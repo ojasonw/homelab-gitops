@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: beyla
+  namespace: beyla
+  labels:
+    k8s-app: beyla
+spec:
+  selector:
+    matchLabels:
+      k8s-app: beyla
+  template:
+    metadata:
+      labels:
+        k8s-app: beyla
+        app: beyla
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8999"
+    spec:
+      serviceAccountName: beyla
+      hostPID: true # obrigatório em modo DaemonSet — Beyla precisa enxergar processos do host
+      containers:
+        - name: beyla
+          # Tag fixa, não :latest — Beyla ainda muda rápido (eBPF, breaking
+          # changes entre minors não são raras); bump de versão vira PR
+          # explícito. v3.31.0 é a que foi validada no POC em produção.
+          image: grafana/beyla:v3.31.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true # forma simples pra teste; depois dá pra restringir a capabilities específicas
+          env:
+            - name: BEYLA_CONFIG_PATH
+              value: "/etc/beyla/beyla-config.yml"
+            - name: BEYLA_TRACE_PRINTER
+              value: "text" # imprime traces no log do próprio Beyla — útil pra validar captura
+            - name: KUBE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OTEL_EBPF_KUBE_CLUSTER_NAME
+              value: "zuno-app" # resolve o warning "can't fetch Kubernetes Cluster Name"
+          volumeMounts:
+            - name: beyla-config
+              mountPath: /etc/beyla
+            - name: bpffs
+              mountPath: /sys/fs/bpf
+              mountPropagation: Bidirectional # resolve o warning "creating bpffs otel path failed"
+          ports:
+            - containerPort: 8999
+              name: metrics
+      volumes:
+        - name: beyla-config
+          configMap:
+            name: beyla-config
+        - name: bpffs
+          hostPath:
+            path: /sys/fs/bpf
+            type: DirectoryOrCreate
