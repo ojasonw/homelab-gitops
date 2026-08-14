@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: beyla-config
+  namespace: beyla
+data:
+  beyla-config.yml: |
+    attributes:
+      kubernetes:
+        enable: true
+    routes:
+      unmatched: heuristic
+    discovery:
+      instrument:
+        - k8s_deployment_name: "backend"
+          k8s_namespace: "zuno-app"
+    # Exporta como Prometheus (endpoint interno que o próprio Beyla expõe)
+    prometheus_export:
+      port: 8999
+      path: /metrics
