@@ -43,11 +43,16 @@ data:
   # Inofensivo para a imagem hoje em prod (v0.0.13): essa var não existe no
   # código antigo, então fica sem uso até a imagem nova subir.
   TRUSTED_PROXIES: "10.42.0.0/16"
-  # NÃO ATIVAR ainda — ver PR description. A imagem hoje em prod (v0.0.13)
-  # não tem application-prod.properties; forçar profile "prod" nela desativa
-  # o "local" (hardcoded em application.properties) sem nada para substituí-lo,
-  # e spring.mail.username/password/support, spring.cors.urls, supabase.bucket
-  # e app.frontend.reset-password-url só existem dentro do arquivo do profile
-  # ativo — ficariam undefined. Só descomentar depois que a imagem com
-  # application-prod.properties (mesma branch acima) estiver no ar.
-  # SPRING_PROFILES_ACTIVE: "prod"
+  # Ativado em 2026-08-14: a imagem com application-prod.properties
+  # (zuno-webapp/backend, branch development, PR #22) já está no ar
+  # (v0.0.14). zuno-webapp/backend#22 removeu "spring.profiles.active=local"
+  # de application.properties e nunca setou isso aqui — sem profile
+  # nenhum ativo, nada em application-{profile}.properties carrega, e
+  # spring.cors.urls=${CORS_URLS} (só existe nos arquivos de profile)
+  # ficou sem resolver: BeanCreationException em SecurityConfig,
+  # CrashLoopBackOff no pod novo desde então (pod antigo v0.0.13 continuou
+  # servindo, rolling update não mata o antigo até o novo ficar Ready).
+  # Todas as demais chaves que application-prod.properties referencia
+  # (SUPABASE_*, FRONTEND_RESET_PASSWORD_URL, TRUSTED_PROXIES, EMAIL_*)
+  # já existem neste ConfigMap/Secret — confirmado antes de ativar.
+  SPRING_PROFILES_ACTIVE: "prod"
