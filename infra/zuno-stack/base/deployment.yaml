@@ -65,7 +65,15 @@ spec:
             cpu: 100m
             memory: 384Mi
           limits:
-            cpu: 500m
+            # Subido de 500m pra 1500m em 2026-08-14: testes de carga (5, 15
+            # requisições concorrentes de agendamento) mostraram o node
+            # 85-97% ocioso durante o pico, mas o boot da JVM sofrendo
+            # throttling de CFS (98.8% dos períodos a 500m, medido via
+            # cpu.stat) — o node tem folga real (4 vCPU, ~800m de request
+            # comprometido hoje), só o limite por container é que estava
+            # curto. 1.5 core deixa ~2.3 cores de folga pros dois tenants +
+            # frontend + postgres, mesmo se os dois bootarem ao mesmo tempo.
+            cpu: 1500m
             memory: 512Mi
 ---
 apiVersion: apps/v1
