@@ -30,3 +30,24 @@ data:
   # pra qualquer outro perfil; sobrescreve local via env var, que tem
   # precedência sobre application-{profile}.properties no Spring Boot.
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  # Backend passa a confiar em X-Forwarded-For/X-Real-IP só quando o request
+  # vem de um proxy confiável (branch zuno-webapp/backend TASK/S01-IA, ainda
+  # sem PR — ver ClientIpResolver). Todo tráfego chega no backend só depois de
+  # passar pelo nginx do frontend (mesmo pod network, backend é ClusterIP-only
+  # — ver nginx-config.yaml), então o "proxy confiável" é o pod do nginx, cujo
+  # IP varia dentro do CIDR de pods do cluster. k3s aqui roda com o flannel
+  # padrão (sem --cluster-cidr custom no playbook do Ansible), daí 10.42.0.0/16
+  # em vez de um IP fixo. Sem isso, o rate limit por telefone/IP passa a
+  # enxergar só o IP do pod do nginx para todo mundo — não quebra nada, só
+  # inutiliza o rate limit por IP (todo cliente cai no mesmo bucket).
+  # Inofensivo para a imagem hoje em prod (v0.0.13): essa var não existe no
+  # código antigo, então fica sem uso até a imagem nova subir.
+  TRUSTED_PROXIES: "10.42.0.0/16"
+  # NÃO ATIVAR ainda — ver PR description. A imagem hoje em prod (v0.0.13)
+  # não tem application-prod.properties; forçar profile "prod" nela desativa
+  # o "local" (hardcoded em application.properties) sem nada para substituí-lo,
+  # e spring.mail.username/password/support, spring.cors.urls, supabase.bucket
+  # e app.frontend.reset-password-url só existem dentro do arquivo do profile
+  # ativo — ficariam undefined. Só descomentar depois que a imagem com
+  # application-prod.properties (mesma branch acima) estiver no ar.
+  # SPRING_PROFILES_ACTIVE: "prod"
