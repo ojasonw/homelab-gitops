@@ -24,6 +24,19 @@ data:
       instrument:
         - k8s_pod_labels:
             beyla.grafana.com/instrument: "true"
+    # Desligado em 2026-08-14: attach do Java agent (antes só dava timeout,
+    # inofensivo — ver docs/beyla-java-attach-timeout.md) começou a
+    # conseguir anexar com sucesso e, imediatamente depois, o backend
+    # (zuno-app E skulls) passou a morrer sem stack trace sempre no mesmo
+    # ponto do boot (logo após o Hikari conectar no Postgres) — via
+    # CrashLoopBackOff nos dois tenants. Correlação forte demais pra
+    # ignorar: "A Java agent has been loaded dynamically" aparece nos dois
+    # crashes, nunca aparecia antes. A parte de rede eBPF (sem agent) já
+    # está confirmada funcionando (http_server_*/db_client_* no
+    # VictoriaMetrics) e continua ativa — só a instrumentação via agent
+    # que fica pausada até a causa ser entendida.
+    javaagent:
+      enabled: false
     # Exporta como Prometheus (endpoint interno que o próprio Beyla expõe)
     prometheus_export:
       port: 8999
