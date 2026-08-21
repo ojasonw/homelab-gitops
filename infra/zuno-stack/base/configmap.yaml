@@ -56,3 +56,16 @@ data:
   # (SUPABASE_*, FRONTEND_RESET_PASSWORD_URL, TRUSTED_PROXIES, EMAIL_*)
   # já existem neste ConfigMap/Secret — confirmado antes de ativar.
   SPRING_PROFILES_ACTIVE: "prod"
+  # Sessão do admin dura 10h (600 min) sem renovar. Com os 60 min padrão do
+  # backend, o barbeiro que deixa a aba aberta durante o expediente esbarra na
+  # expiração, e a primeira ação depois disso falha com "Você não tem permissão
+  # para realizar esta ação" — o frontend só tenta renovar o token em 401, e o
+  # backend devolve 403 para token expirado (FilterTokenAccess engole a falha
+  # de validação e SecurityConfig não define AuthenticationEntryPoint, ver
+  # zuno-webapp/backend). Enquanto esse 401 não sai, o token mais longo é o que
+  # tira o usuário da parede.
+  #
+  # Revogação continua valendo: logout e reset de senha carimbam
+  # User.tokenValidAfter, e FilterTokenAccess rejeita qualquer token emitido
+  # antes desse instante — inclusive um de 10h ainda dentro da validade.
+  JWT_ACCESS_TOKEN_MINUTES: "600"
