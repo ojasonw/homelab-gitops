@@ -23,5 +23,5 @@ images:
     newName: ojasonw/zuno-be
     newTag: v0.0.15
   - name: ghcr.io/zuno-webapp/zuno-frontend
-    newTag: v0.0.15
+    newTag: v0.0.16
     newName: ojasonw/zuno-frontend
