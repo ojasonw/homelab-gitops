@@ -1,0 +1,24 @@
+auth:
+  # Password vem do Secret czanks-postgres (ExternalSecret -> Infisical
+  # /zuno-clients/czanks/POSTGRES_PASSWORD), nao em texto plano aqui.
+  existingSecret: czanks-postgres
+  database: czanks-db
+
+primary:
+  replicaCount: 1
+
+persistence:
+  enabled: true
+  storageClass: custom-local-path
+  size: 8Gi
+
+# Sem isto o pod ficava QoS BestEffort — primeiro candidato a OOM-kill sob
+# pressao de memoria no node (node tem so 4Gi). Uso observado fica em
+# ~50Mi ocioso; folga de 2-3x cobre picos de conexao/migracao.
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 384Mi
