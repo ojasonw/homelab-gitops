@@ -30,13 +30,18 @@ isso o ArgoCD nunca precisou de credencial de leitura de git. `zuno-tips` é
 frontend também são privados). Isso é peça nova: hoje não existe nenhum
 `Secret` do tipo `repository` no namespace `argocd` do cluster.
 
-- Criar um GitHub PAT fine-grained, read-only, escopado só a
-  `zuno-webapp/zuno-tips`.
-- Aplicar como `Secret` (label `argocd.argoproj.io/secret-type: repository`)
-  no namespace `argocd` — bootstrap manual, mesma classe dos outros
-  segredos deste cluster que não passam pelo Infisical (token do túnel
-  Cloudflare, identidade universal do Infisical) porque autenticam algo que
-  o próprio Infisical/GitOps depende de já estar funcionando.
+- Criar uma **deploy key** SSH no repo (`Settings → Deploy keys` do
+  `zuno-tips`, sem "Allow write access") — não um PAT. Escopo nativo de 1
+  repo só, sem vínculo com conta pessoal, sem expiração forçada (PAT
+  fine-grained do GitHub expira em até 1 ano, precisa rotação; deploy key
+  não). ArgoCD suporta nativamente via `sshPrivateKey` no `Secret` de repo,
+  mais simples que usuário+senha de um PAT.
+- Aplicar como `Secret` (label `argocd.argoproj.io/secret-type: repository`,
+  campos `url` + `sshPrivateKey`) no namespace `argocd` — bootstrap manual,
+  mesma classe dos outros segredos deste cluster que não passam pelo
+  Infisical (token do túnel Cloudflare, identidade universal do Infisical)
+  porque autenticam algo que o próprio Infisical/GitOps depende de já
+  estar funcionando.
 - Validar a leitura (`argocd repo get` ou equivalente) **antes** do cutover,
   isolado, sem mexer em nenhuma `Application` real ainda.
 
@@ -125,12 +130,16 @@ migração de repo).
 
 ## Riscos
 
-- **Credencial nova no ArgoCD** (PAT read-only pro `zuno-tips`) é ponto único
+- **Credencial nova no ArgoCD** (deploy key SSH pro `zuno-tips`) é ponto único
   de falha do cutover: se estiver errada/faltando permissão, `root-app` para
   de sincronizar — mas o cluster continua rodando com o último estado
   aplicado (ArgoCD não remove recursos por falha de leitura de repo, só para
   de detectar mudança). Validar a leitura isolada antes do passo 2 do
   cutover cobre isso.
+- **`repoURL` muda de forma**: com deploy key SSH, `repoURL` vira
+  `git@github.com:zuno-webapp/zuno-tips.git` (SSH), não mais HTTPS — precisa
+  ser essa mesma forma em toda `Application` filha, ArgoCD casa a
+  credencial pela URL exata.
 - **`repoURL` esquecido em algum arquivo**: como cada `Application` carrega
   o próprio `repoURL`, uma migração de conteúdo incompleta deixaria
   `Application`s filhas ainda lendo do repo pessoal mesmo depois do
@@ -148,5 +157,5 @@ Plano de implementação detalhado via `writing-plans`, cobrindo, nesta ordem:
 sincronizar `zuno-tips` com o estado atual + trocar todo `repoURL` +
 dissolver o chart Postgres pro molde novo (só na base, sem tocar tenants
 existentes) + desenhar o `ApplicationSet` (template + gerador) + credencial
-PAT/Secret + validação isolada + cutover do `root-app` + arquivar
+deploy key/Secret + validação isolada + cutover do `root-app` + arquivar
 `homelab-gitops`.
