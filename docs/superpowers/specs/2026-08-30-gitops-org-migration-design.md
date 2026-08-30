@@ -1,8 +1,8 @@
-# Design: gitops sai de `ojasonw/homelab-gitops` (pessoal) para `zuno-webapp/zuno-tips` (org)
+# Design: gitops sai de `ojasonw/homelab-gitops` (pessoal) para `zuno-webapp/zuno-gitops` (org)
 
 ## Contexto
 
-`zuno-webapp/zuno-tips` já existe — extraído de `ojasonw/homelab-gitops` em
+`zuno-webapp/zuno-gitops` já existe — extraído de `ojasonw/homelab-gitops` em
 2026-08-08 como cópia de referência, mas **nunca foi live**: as `Application`
 do ArgoCD (`root-app` e as 12 filhas) ainda apontam pro repo pessoal. Ver
 `zuno-app/CLAUDE.md`, seção *Tools & accounts* — este repo é um dos
@@ -19,19 +19,19 @@ tenant é descrito.
 
 ## Decisões
 
-### 1. Repo: `zuno-tips` vira o gitops de verdade
+### 1. Repo: `zuno-gitops` vira o gitops de verdade
 
 Reaproveita o repo já extraído em vez de criar um novo do zero — evita
 recomeçar história/estrutura.
 
 **Diferença que muda o setup**: `homelab-gitops` (pessoal) é **público**, por
-isso o ArgoCD nunca precisou de credencial de leitura de git. `zuno-tips` é
+isso o ArgoCD nunca precisou de credencial de leitura de git. `zuno-gitops` é
 **privado** (mesmo padrão dos outros repos da org — terraform/backend/
 frontend também são privados). Isso é peça nova: hoje não existe nenhum
 `Secret` do tipo `repository` no namespace `argocd` do cluster.
 
 - Criar uma **deploy key** SSH no repo (`Settings → Deploy keys` do
-  `zuno-tips`, sem "Allow write access") — não um PAT. Escopo nativo de 1
+  `zuno-gitops`, sem "Allow write access") — não um PAT. Escopo nativo de 1
   repo só, sem vínculo com conta pessoal, sem expiração forçada (PAT
   fine-grained do GitHub expira em até 1 ano, precisa rotação; deploy key
   não). ArgoCD suporta nativamente via `sshPrivateKey` no `Secret` de repo,
@@ -53,7 +53,7 @@ arquivo `.yaml` nesse diretório vira uma `Application` filha, cada uma
 carregando seu próprio `repoURL` (mesmo valor, repetido em cada arquivo).
 
 Cutover:
-1. Preparar `zuno-tips` com o conteúdo completo já migrado — todo `repoURL`
+1. Preparar `zuno-gitops` com o conteúdo completo já migrado — todo `repoURL`
    trocado pro org, de ponta a ponta — sem tocar `root-app` ainda.
 2. `kubectl edit application root-app -n argocd`, trocar só o `repoURL`.
 3. ArgoCD reconcilia a partir do repo novo. Nomes de `Application`,
@@ -130,14 +130,14 @@ migração de repo).
 
 ## Riscos
 
-- **Credencial nova no ArgoCD** (deploy key SSH pro `zuno-tips`) é ponto único
+- **Credencial nova no ArgoCD** (deploy key SSH pro `zuno-gitops`) é ponto único
   de falha do cutover: se estiver errada/faltando permissão, `root-app` para
   de sincronizar — mas o cluster continua rodando com o último estado
   aplicado (ArgoCD não remove recursos por falha de leitura de repo, só para
   de detectar mudança). Validar a leitura isolada antes do passo 2 do
   cutover cobre isso.
 - **`repoURL` muda de forma**: com deploy key SSH, `repoURL` vira
-  `git@github.com:zuno-webapp/zuno-tips.git` (SSH), não mais HTTPS — precisa
+  `git@github.com:zuno-webapp/zuno-gitops.git` (SSH), não mais HTTPS — precisa
   ser essa mesma forma em toda `Application` filha, ArgoCD casa a
   credencial pela URL exata.
 - **`repoURL` esquecido em algum arquivo**: como cada `Application` carrega
@@ -146,7 +146,7 @@ migração de repo).
   `root-app` já apontar pro novo. Mitigação: grep por
   `github.com/ojasonw/homelab-gitops` no repo novo antes de considerar a
   preparação concluída — tem que dar zero.
-- **`zuno-tips` desatualizado**: como é cópia manual de 2026-08-08, tem que
+- **`zuno-gitops` desatualizado**: como é cópia manual de 2026-08-08, tem que
   ser resincronizado com o estado atual do `homelab-gitops` (inclui os PRs
   #113/#114 recentes) antes do conteúdo ser considerado "completo" pro
   cutover.
@@ -154,7 +154,7 @@ migração de repo).
 ## Próximo passo
 
 Plano de implementação detalhado via `writing-plans`, cobrindo, nesta ordem:
-sincronizar `zuno-tips` com o estado atual + trocar todo `repoURL` +
+sincronizar `zuno-gitops` com o estado atual + trocar todo `repoURL` +
 dissolver o chart Postgres pro molde novo (só na base, sem tocar tenants
 existentes) + desenhar o `ApplicationSet` (template + gerador) + credencial
 deploy key/Secret + validação isolada + cutover do `root-app` + arquivar
