@@ -1,0 +1,24 @@
+# Chaves que variam por tenant. O resto vem de infra/zuno-stack/base.
+#
+# APP_TENANT_BASE_DOMAIN nao aparece aqui de proposito: e o mesmo
+# zunosite.com do base, porque o TenantResolver tira ".zunosite.com" do
+# header Host independentemente de qual deployment responde.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgresql-czanks-prod:5432/czanks-db"
+  SUPABASE_BUCKET: "czanks-bucket"
+  FRONTEND_RESET_PASSWORD_URL: "https://czanks.zunosite.com/admin/redefinir-senha"
+  # skull is an isolated single-customer deployment (one barber, one
+  # database) — requires backend v0.0.7+, which adds this fallback so the
+  # public booking flow works without the barber's username having to
+  # match the subdomain slug. zuno-app (shared multi-tenant) leaves this
+  # unset/false, since matching by username is how it picks among many.
+  APP_TENANT_SINGLE_TENANT_MODE: "true"
+  # spring.mail.support (EmailService, backend >= v0.0.13) — remetente dos
+  # e-mails simples, separado do EMAIL_USERNAME que autentica no SMTP. Sem
+  # isso o contexto do Spring falha ao subir: "Could not resolve placeholder
+  # 'EMAIL_SUPPORT'".
+  EMAIL_SUPPORT: "suporte@zunosite.com"
